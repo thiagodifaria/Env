@@ -1,0 +1,66 @@
+name: Validation Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup PowerShell
+      shell: pwsh
+      run: |
+        Write-Host "PowerShell Version: $($PSVersionTable.PSVersion)"
+        Write-Host "OS: $($PSVersionTable.OS)"
+    
+    - name: Install Pester
+      shell: pwsh
+      run: |
+        Install-Module -Name Pester -Force -SkipPublisherCheck -Scope CurrentUser
+    
+    - name: Validate JSON files
+      shell: pwsh
+      run: |
+        Write-Host "Validating packages.json..."
+        Get-Content config/packages.json | ConvertFrom-Json | Out-Null
+        
+        Write-Host "Validating presets.json..."
+        Get-Content config/presets.json | ConvertFrom-Json | Out-Null
+        
+        Write-Host "Validating strings.json..."
+        Get-Content config/strings.json | ConvertFrom-Json | Out-Null
+        
+        Write-Host "All JSON files are valid!"
+    
+    - name: Run Pester Tests
+      shell: pwsh
+      run: |
+        Invoke-Pester -Path tests/validation.tests.ps1 -Output Detailed
+    
+    - name: Validate PowerShell Syntax
+      shell: pwsh
+      run: |
+        $errors = @()
+        
+        Get-ChildItem -Path . -Filter *.ps1 -Recurse | ForEach-Object {
+          $result = Get-Command $_.FullName -Syntax -ErrorAction SilentlyContinue
+          if (-not $result) {
+            $errors += $_.FullName
+          }
+        }
+        
+        if ($errors.Count -gt 0) {
+          Write-Host "Syntax errors found in:"
+          $errors | ForEach-Object { Write-Host "  $_" }
+          exit 1
+        }
+        
+        Write-Host "All PowerShell files have valid syntax!"

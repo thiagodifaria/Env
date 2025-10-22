@@ -1,0 +1,315 @@
+{
+  "languages": [
+    {
+      "id": "python310",
+      "name": "Python 3.10",
+      "choco_package": "python310",
+      "version": "3.10.11",
+      "command": "python3.10"
+    },
+    {
+      "id": "python311",
+      "name": "Python 3.11",
+      "choco_package": "python311",
+      "version": "3.11.9",
+      "command": "python3.11"
+    },
+    {
+      "id": "python312",
+      "name": "Python 3.12",
+      "choco_package": "python312",
+      "version": "3.12.8",
+      "command": "python3.12"
+    },
+    {
+      "id": "python313",
+      "name": "Python 3.13",
+      "choco_package": "python313",
+      "version": "3.13.1",
+      "command": "python3.13"
+    },
+    {
+      "id": "nodejs",
+      "name": "Node.js",
+      "choco_package": "nodejs",
+      "version": "latest",
+      "command": "node"
+    },
+    {
+      "id": "openjdk",
+      "name": "OpenJDK",
+      "choco_package": "openjdk",
+      "version": "latest",
+      "command": "java"
+    },
+    {
+      "id": "rust",
+      "name": "Rust",
+      "choco_package": "rust",
+      "version": "latest",
+      "command": "rustc"
+    },
+    {
+      "id": "golang",
+      "name": "Go",
+      "choco_package": "golang",
+      "version": "latest",
+      "command": "go"
+    },
+    {
+      "id": "mingw",
+      "name": "MinGW",
+      "choco_package": "mingw",
+      "version": "latest",
+      "command": "gcc"
+    },
+    {
+      "id": "nasm",
+      "name": "NASM",
+      "choco_package": "nasm",
+      "version": "latest",
+      "command": "nasm"
+    },
+    {
+      "id": "erlang",
+      "name": "Erlang",
+      "choco_package": "erlang",
+      "version": "latest",
+      "command": "erl"
+    },
+    {
+      "id": "ruby",
+      "name": "Ruby",
+      "choco_package": "ruby",
+      "version": "latest",
+      "command": "ruby"
+    },
+    {
+      "id": "lua",
+      "name": "Lua",
+      "choco_package": "lua",
+      "version": "latest",
+      "command": "lua"
+    },
+    {
+      "id": "php",
+      "name": "PHP",
+      "choco_package": "php",
+      "version": "latest",
+      "command": "php"
+    },
+    {
+      "id": "gfortran",
+      "name": "GFortran",
+      "choco_package": "gfortran",
+      "version": "latest",
+      "command": "gfortran"
+    },
+    {
+      "id": "strawberryperl",
+      "name": "Strawberry Perl",
+      "choco_package": "strawberryperl",
+      "version": "latest",
+      "command": "perl"
+    },
+    {
+      "id": "julia",
+      "name": "Julia",
+      "choco_package": "julia",
+      "version": "latest",
+      "command": "julia"
+    },
+    {
+      "id": "gtk-runtime",
+      "name": "GTK Runtime",
+      "choco_package": "gtk-runtime",
+      "version": "latest",
+      "command": null
+    },
+    {
+      "id": "msys2",
+      "name": "MSYS2",
+      "choco_package": "msys2",
+      "version": "latest",
+      "command": "msys2"
+    }
+  ],
+  "devtools": [
+    {
+      "id": "git",
+      "name": "Git",
+      "choco_package": "git",
+      "version": "latest",
+      "command": "git"
+    },
+    {
+      "id": "docker-desktop",
+      "name": "Docker Desktop",
+      "choco_package": "docker-desktop",
+      "version": "latest",
+      "command": "docker"
+    },
+    {
+      "id": "vscode",
+      "name": "Visual Studio Code",
+      "choco_package": "vscode",
+      "version": "latest",
+      "command": "code"
+    },
+    {
+      "id": "kubernetes-cli",
+      "name": "Kubernetes CLI",
+      "choco_package": "kubernetes-cli",
+      "version": "latest",
+      "command": "kubectl"
+    },
+    {
+      "id": "terraform",
+      "name": "Terraform",
+      "choco_package": "terraform",
+      "version": "latest",
+      "command": "terraform"
+    },
+    {
+      "id": "cmake",
+      "name": "CMake",
+      "choco_package": "cmake",
+      "version": "latest",
+      "command": "cmake"
+    },
+    {
+      "id": "7zip",
+      "name": "7-Zip",
+      "choco_package": "7zip",
+      "version": "latest",
+      "command": "7z"
+    },
+    {
+      "id": "notepadplusplus",
+      "name": "Notepad++",
+      "choco_package": "notepadplusplus",
+      "version": "latest",
+      "command": "notepad++"
+    }
+  ],
+  "webtools": [
+    {
+      "id": "postman",
+      "name": "Postman",
+      "choco_package": "postman",
+      "version": "latest",
+      "command": "postman"
+    },
+    {
+      "id": "nginx",
+      "name": "Nginx",
+      "choco_package": "nginx",
+      "version": "latest",
+      "command": "nginx"
+    },
+    {
+      "id": "redis",
+      "name": "Redis",
+      "choco_package": "redis",
+      "version": "latest",
+      "command": "redis-cli"
+    }
+  ],
+  "dbtools": [
+    {
+      "id": "postgresql",
+      "name": "PostgreSQL",
+      "choco_package": "postgresql",
+      "version": "latest",
+      "command": "psql"
+    },
+    {
+      "id": "mongodb",
+      "name": "MongoDB",
+      "choco_package": "mongodb",
+      "version": "latest",
+      "command": "mongo"
+    },
+    {
+      "id": "mongodb-compass",
+      "name": "MongoDB Compass",
+      "choco_package": "mongodb-compass",
+      "version": "latest",
+      "command": null
+    },
+    {
+      "id": "dbeaver",
+      "name": "DBeaver",
+      "choco_package": "dbeaver",
+      "version": "latest",
+      "command": "dbeaver"
+    }
+  ],
+  "observability": [
+    {
+      "id": "grafana",
+      "name": "Grafana",
+      "choco_package": "grafana",
+      "version": "latest",
+      "command": "grafana-server"
+    },
+    {
+      "id": "prometheus",
+      "name": "Prometheus",
+      "choco_package": "prometheus",
+      "version": "latest",
+      "command": "prometheus"
+    }
+  ],
+  "personal": [
+    {
+      "id": "discord",
+      "name": "Discord",
+      "choco_package": "discord",
+      "version": "latest",
+      "command": null
+    },
+    {
+      "id": "steam",
+      "name": "Steam",
+      "choco_package": "steam",
+      "version": "latest",
+      "command": null
+    },
+    {
+      "id": "spotify",
+      "name": "Spotify",
+      "choco_package": "spotify",
+      "version": "latest",
+      "command": null
+    },
+    {
+      "id": "vlc",
+      "name": "VLC Media Player",
+      "choco_package": "vlc",
+      "version": "latest",
+      "command": "vlc"
+    }
+  ],
+  "wsl": [],
+  "npm": [
+    {
+      "id": "typescript",
+      "name": "TypeScript",
+      "npm_package": "typescript",
+      "command": "tsc"
+    },
+    {
+      "id": "yarn",
+      "name": "Yarn",
+      "npm_package": "yarn",
+      "command": "yarn"
+    },
+    {
+      "id": "pnpm",
+      "name": "PNPM",
+      "npm_package": "pnpm",
+      "command": "pnpm"
+    }
+  ]
+}

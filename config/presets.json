@@ -1,0 +1,42 @@
+{
+  "difaria": {
+    "name": "DiFaria Complete",
+    "description": "Instalação completa com todas as ferramentas de desenvolvimento e aplicativos pessoais",
+    "categories": [
+      "languages",
+      "devtools",
+      "webtools",
+      "dbtools",
+      "observability",
+      "personal",
+      "wsl",
+      "npm"
+    ]
+  },
+  "developer": {
+    "name": "Developer Environment",
+    "description": "Ambiente completo de desenvolvimento sem aplicativos pessoais",
+    "categories": [
+      "languages",
+      "devtools",
+      "webtools",
+      "dbtools",
+      "observability",
+      "wsl",
+      "npm"
+    ]
+  },
+  "minimal": {
+    "name": "Minimal Setup",
+    "description": "Apenas ferramentas essenciais para desenvolvimento",
+    "categories": [
+      "devtools"
+    ],
+    "packages": [
+      "git",
+      "vscode",
+      "nodejs",
+      "python312"
+    ]
+  }
+}

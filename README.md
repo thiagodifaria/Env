@@ -69,7 +69,7 @@ Env is an **PowerShell automation tool** for setting up complete Windows develop
 # Clone and run
 git clone https://github.com/thiagodifaria/Env.git C:\ENV
 cd C:\ENV
-.\setup.ps1
+.\env.ps1
 
 # Follow interactive menus to select packages
 ```
@@ -78,17 +78,17 @@ cd C:\ENV
 
 ```powershell
 # Install all packages automatically
-.\setup.ps1 -Mode Auto
+.\env.ps1 -Mode Auto
 
 # Install only essentials
-.\setup.ps1 -Mode Custom
+.\env.ps1 -Mode Custom
 ```
 
 ### Option 3: Advanced Options
 
 ```powershell
 # Parallel installation with custom settings
-.\setup.ps1 -Mode Interactive -MaxParallel 5 -SkipBackup -NoCache
+.\env.ps1 -Mode Interactive -MaxParallel 5 -SkipBackup -NoCache
 ```
 
 ---

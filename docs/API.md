@@ -12,9 +12,9 @@ Documentação técnica detalhada de todas as funções públicas do projeto ENV
   - [1.5 backup.ps1](#15-backupps1)
   - [1.6 error-handler.ps1](#16-error-handlerps1)
 - [2. Installers](#2-installers)
-  - [2.1 terminal-setup.ps1](#21-terminal-setupps1)
+  - [2.1 terminal-env.ps1](#21-terminal-setupps1)
   - [2.2 modern-tools.ps1](#22-modern-toolsps1)
-  - [2.3 git-setup.ps1](#23-git-setupps1)
+  - [2.3 git-env.ps1](#23-git-setupps1)
 - [3. Utils](#3-utils)
   - [3.1 cache.ps1](#31-cacheps1)
   - [3.2 parallel.ps1](#32-parallelps1)
@@ -1367,7 +1367,7 @@ Por Severidade:
 
 ## 2. Installers
 
-### 2.1 terminal-setup.ps1
+### 2.1 terminal-env.ps1
 
 Funções para configuração de terminal.
 
@@ -1597,7 +1597,7 @@ Invoke-Expression (& { (zoxide init powershell | Out-String) })
 
 ---
 
-### 2.3 git-setup.ps1
+### 2.3 git-env.ps1
 
 Funções para configuração do Git.
 

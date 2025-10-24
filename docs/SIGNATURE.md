@@ -127,7 +127,7 @@ Sign-ProjectScripts -Verbose
 
 **O que é assinado:**
 - `env.ps1` (ponto de entrada principal)
-- `setup.ps1` (script de configuração)
+- `env.ps1` (script de configuração)
 - Todos os scripts em `core/*.ps1`
 - Todos os scripts em `installers/*.ps1`
 - Todos os scripts em `utils/*.ps1`

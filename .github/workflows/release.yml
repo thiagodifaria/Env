@@ -55,7 +55,7 @@ jobs:
           "utils",
           "ui",
           "config",
-          "setup.ps1",
+          "env.ps1",
           "README.md",
           "LICENSE"
         )
@@ -103,12 +103,12 @@ Windows Development Environment Setup Tool
 1. Download ENV-$version.zip
 2. Verify checksums (see checksums.txt)
 3. Extract the archive
-4. Run setup.ps1 with administrator privileges
+4. Run env.ps1 with administrator privileges
 
 ```powershell
 Expand-Archive -Path ENV-$version.zip -DestinationPath C:\ENV
 cd C:\ENV
-.\setup.ps1
+.\env.ps1
 ```
 
 ## Features

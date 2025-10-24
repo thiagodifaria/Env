@@ -44,7 +44,7 @@ ENV é um framework de automação PowerShell modular que segue princípios SOLI
 
 ```
 Env/
-├── setup.ps1                    # Entry point principal
+├── env.ps1                    # Entry point principal
 ├── config/                      # Configurações
 │   ├── packages.json           # Definição de pacotes
 │   ├── packages.schema.json    # Schema de validação
@@ -58,9 +58,9 @@ Env/
 │   ├── backup.ps1              # Sistema de backup
 │   └── error-handler.ps1       # Tratamento de erros
 ├── installers/                  # Instaladores específicos
-│   ├── terminal-setup.ps1      # Oh My Posh, Starship
+│   ├── terminal-env.ps1      # Oh My Posh, Starship
 │   ├── modern-tools.ps1        # bat, eza, fzf, rg, zoxide
-│   ├── git-setup.ps1           # Git + configuração
+│   ├── git-env.ps1           # Git + configuração
 │   ├── devtools.ps1            # VS Code, IDEs
 │   └── languages.ps1           # Node, Python, Go, etc.
 ├── utils/                       # Utilitários
@@ -216,7 +216,7 @@ backups/backup-YYYYMMDD-HHMMSS/
 
 ## Fluxo de Execução
 
-### Fluxo Principal (setup.ps1)
+### Fluxo Principal (env.ps1)
 
 ```
 1. Verificações Iniciais
@@ -628,7 +628,7 @@ Total: 74.3%
 
 1. Criar `installers/novo-instalador.ps1`
 2. Implementar função `Install-[Feature]`
-3. Chamar de `setup.ps1`
+3. Chamar de `env.ps1`
 4. Adicionar testes
 
 ---

@@ -53,7 +53,7 @@ PowerShell automation framework for setting up complete Windows development envi
 The project follows SOLID principles with clear separation between core functionality, installers, utilities, and UI:
 
 ```
-setup.ps1 (Entry Point)
+env.ps1 (Entry Point)
     ↓
 ┌──────────────────────────────────────┐
 │         Core Modules                 │
@@ -164,7 +164,7 @@ git clone https://github.com/thiagodifaria/Env.git C:\ENV
 cd C:\ENV
 
 # Run setup with interactive menu
-.\setup.ps1
+.\env.ps1
 
 # Follow the prompts to:
 # 1. Select package manager (or auto-detect)
@@ -184,13 +184,13 @@ cd C:\ENV
 
 ```powershell
 # Install everything with defaults
-.\setup.ps1 -Mode Auto -Preset Full
+.\env.ps1 -Mode Auto -Preset Full
 
 # Install only essentials (git, vscode, terminal tools)
-.\setup.ps1 -Mode Auto -Preset Minimal
+.\env.ps1 -Mode Auto -Preset Minimal
 
 # Install development tools only
-.\setup.ps1 -Mode Auto -Preset Developer
+.\env.ps1 -Mode Auto -Preset Developer
 ```
 
 **Available Presets:**
@@ -202,20 +202,20 @@ cd C:\ENV
 
 ```powershell
 # Install specific categories
-.\setup.ps1 -Categories @("Languages", "DevTools", "Terminal")
+.\env.ps1 -Categories @("Languages", "DevTools", "Terminal")
 
 # Install specific packages
-.\setup.ps1 -Packages @("git", "vscode", "docker-desktop", "nodejs-lts")
+.\env.ps1 -Packages @("git", "vscode", "docker-desktop", "nodejs-lts")
 
 # Combine categories and packages
-.\setup.ps1 -Categories @("Languages") -Packages @("vscode", "postman")
+.\env.ps1 -Categories @("Languages") -Packages @("vscode", "postman")
 ```
 
 ### Option 4: Advanced Configuration
 
 ```powershell
 # Parallel installation with custom settings
-.\setup.ps1 `
+.\env.ps1 `
     -Mode Interactive `
     -MaxParallel 5 `
     -PreferredManager "Chocolatey" `
@@ -224,10 +224,10 @@ cd C:\ENV
     -Verbose
 
 # Use specific package manager only
-.\setup.ps1 -ForceManager "Winget"
+.\env.ps1 -ForceManager "Winget"
 
 # Dry run (show what would be installed without doing it)
-.\setup.ps1 -WhatIf
+.\env.ps1 -WhatIf
 ```
 
 **Advanced Parameters:**
@@ -254,7 +254,7 @@ ENV organizes packages into logical categories for easier management:
 
 **Installation:**
 ```powershell
-.\setup.ps1 -Categories @("Languages")
+.\env.ps1 -Categories @("Languages")
 ```
 
 ### 2. Development Tools
@@ -269,7 +269,7 @@ ENV organizes packages into logical categories for easier management:
 
 **Installation:**
 ```powershell
-.\setup.ps1 -Categories @("DevTools")
+.\env.ps1 -Categories @("DevTools")
 ```
 
 ### 3. Terminal & Shell
@@ -290,7 +290,7 @@ ENV organizes packages into logical categories for easier management:
 
 **Installation:**
 ```powershell
-.\setup.ps1 -Categories @("Terminal")
+.\env.ps1 -Categories @("Terminal")
 ```
 
 ### 4. Modern CLI Tools
@@ -311,7 +311,7 @@ ENV organizes packages into logical categories for easier management:
 
 **Installation:**
 ```powershell
-.\setup.ps1 -Categories @("ModernTools")
+.\env.ps1 -Categories @("ModernTools")
 ```
 
 ### 5. Version Control & Git
@@ -364,7 +364,7 @@ merge.conflictStyle = diff3
 
 **Installation:**
 ```powershell
-.\setup.ps1 -Categories @("Git")
+.\env.ps1 -Categories @("Git")
 ```
 
 ### 6. Databases & Data Tools
@@ -379,7 +379,7 @@ merge.conflictStyle = diff3
 
 **Installation:**
 ```powershell
-.\setup.ps1 -Categories @("Databases")
+.\env.ps1 -Categories @("Databases")
 ```
 
 ### 7. Containers & DevOps
@@ -394,7 +394,7 @@ merge.conflictStyle = diff3
 
 **Installation:**
 ```powershell
-.\setup.ps1 -Categories @("DevOps")
+.\env.ps1 -Categories @("DevOps")
 ```
 
 ### 8. Personal & Productivity
@@ -409,7 +409,7 @@ merge.conflictStyle = diff3
 
 **Installation:**
 ```powershell
-.\setup.ps1 -Categories @("Personal")
+.\env.ps1 -Categories @("Personal")
 ```
 
 ## 🔧 Core Features in Detail
@@ -453,13 +453,13 @@ Test-PackageManagerHealth -Manager Chocolatey
 **Usage:**
 ```powershell
 # Let ENV choose best manager
-.\setup.ps1 -Packages @("git")
+.\env.ps1 -Packages @("git")
 
 # Prefer specific manager
-.\setup.ps1 -Packages @("git") -PreferredManager Winget
+.\env.ps1 -Packages @("git") -PreferredManager Winget
 
 # Force specific manager (no fallback)
-.\setup.ps1 -Packages @("git") -ForceManager Scoop
+.\env.ps1 -Packages @("git") -ForceManager Scoop
 ```
 
 ### State Management & Rollback
@@ -507,10 +507,10 @@ ENV tracks all installations with session-based state management:
 # 4. Logs detailed error information
 
 # Manual rollback
-.\setup.ps1 -Rollback -Session "session-20250124-143022"
+.\env.ps1 -Rollback -Session "session-20250124-143022"
 
 # Rollback last session
-.\setup.ps1 -RollbackLast
+.\env.ps1 -RollbackLast
 
 # View session history
 Get-SessionHistory
@@ -632,7 +632,7 @@ Import-Backup -Path "C:\Backups\env-backup.zip"
 # ✅ Before rollback operations
 
 # Disable auto-backup (not recommended)
-.\setup.ps1 -SkipBackup
+.\env.ps1 -SkipBackup
 
 # Configure backup retention (keep last 10)
 Set-BackupRetention -MaxBackups 10
@@ -648,7 +648,7 @@ Install multiple packages concurrently for faster setup:
 **Parallel Execution:**
 ```powershell
 # Install 5 packages in parallel (3 concurrent jobs)
-.\setup.ps1 -Packages @("git", "vscode", "nodejs", "python", "docker") -MaxParallel 3
+.\env.ps1 -Packages @("git", "vscode", "nodejs", "python", "docker") -MaxParallel 3
 
 # Process:
 # Job 1: git      ████████████████ 100% (45s)
@@ -746,7 +746,7 @@ Clear-CachedData -Key "package-info-git"
 Clear-AllCache
 
 # Disable cache for single run
-.\setup.ps1 -NoCache
+.\env.ps1 -NoCache
 
 # View cache statistics
 Get-CacheStats
@@ -849,7 +849,7 @@ Get-ChildItem -Recurse -Filter "*.ps1" |
     Set-AuthenticodeSignature -Certificate $cert
 
 # Verify signature
-Get-AuthenticodeSignature .\setup.ps1
+Get-AuthenticodeSignature .\env.ps1
 
 # Output:
 # SignerCertificate: CN=ENV Scripts
@@ -1477,7 +1477,7 @@ Error: Access to path denied
 # Run PowerShell as Administrator:
 # 1. Right-click PowerShell
 # 2. Select "Run as Administrator"
-# 3. Re-run setup.ps1
+# 3. Re-run env.ps1
 ```
 
 **Issue: Script Execution Policy Error**
@@ -1499,7 +1499,7 @@ Installation stuck at "Installing package X..."
 
 # Solution:
 # Reduce parallel jobs:
-.\setup.ps1 -MaxParallel 1
+.\env.ps1 -MaxParallel 1
 
 # Or kill hung processes:
 Get-Process choco*, winget*, scoop* | Stop-Process -Force
@@ -1512,7 +1512,7 @@ Git aliases not working
 
 # Solution:
 # Manually re-run git setup:
-.\installers\git-setup.ps1
+.\installers\git-env.ps1
 
 # Or check git config:
 git config --global --list
@@ -1544,7 +1544,7 @@ Unexpected errors, outdated package info
 Clear-AllCache
 
 # Rebuild cache:
-.\setup.ps1 -RebuildCache
+.\env.ps1 -RebuildCache
 ```
 
 ### Debug Mode
@@ -1552,16 +1552,16 @@ Clear-AllCache
 **Enable Verbose Logging:**
 ```powershell
 # Verbose output
-.\setup.ps1 -Verbose
+.\env.ps1 -Verbose
 
 # Debug output (very detailed)
-.\setup.ps1 -Debug
+.\env.ps1 -Debug
 
 # Both combined
-.\setup.ps1 -Verbose -Debug
+.\env.ps1 -Verbose -Debug
 
 # Log to file
-.\setup.ps1 -Verbose -LogFile "C:\Logs\env-debug.log"
+.\env.ps1 -Verbose -LogFile "C:\Logs\env-debug.log"
 ```
 
 **Log Locations:**
@@ -1607,7 +1607,7 @@ scoop uninstall git
 A:
 1. Clone ENV repository
 2. Pull your dotfiles from Git
-3. Run `.\setup.ps1` with your preferred preset
+3. Run `.\env.ps1` with your preferred preset
 4. Import your dotfiles
 
 **Q: Is ENV compatible with PowerShell Core (7+)?**
@@ -1616,7 +1616,7 @@ A: Yes! ENV works with both PowerShell 5.1+ and PowerShell Core 7+.
 **Q: Can I run ENV in unattended mode?**
 A: Yes, use `-Mode Auto` with `-Preset`:
 ```powershell
-.\setup.ps1 -Mode Auto -Preset Full
+.\env.ps1 -Mode Auto -Preset Full
 ```
 
 **Q: How do I contribute to ENV?**

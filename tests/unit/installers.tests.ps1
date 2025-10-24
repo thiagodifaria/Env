@@ -1,9 +1,9 @@
 BeforeAll {
     $projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
     . "$projectRoot\core\utils.ps1"
-    . "$projectRoot\installers\terminal-setup.ps1"
+    . "$projectRoot\installers\terminal-env.ps1"
     . "$projectRoot\installers\modern-tools.ps1"
-    . "$projectRoot\installers\git-setup.ps1"
+    . "$projectRoot\installers\git-env.ps1"
 }
 
 Describe "Terminal Setup Functions" {

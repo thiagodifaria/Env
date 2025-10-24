@@ -1,0 +1,183 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PowerShell
+      shell: pwsh
+      run: |
+        $PSVersionTable
+
+    - name: Install Pester
+      shell: pwsh
+      run: |
+        Install-Module -Name Pester -Force -SkipPublisherCheck -Scope CurrentUser -MinimumVersion 5.0
+        Import-Module Pester
+
+    - name: Run unit tests
+      shell: pwsh
+      run: |
+        .\tests\run-tests.ps1 -TestType Unit -CodeCoverage
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: tests/results/test-results.xml
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-report
+        path: tests/results/coverage.xml
+
+    - name: Publish test results
+      uses: EnricoMi/publish-unit-test-result-action/windows@v2
+      if: always()
+      with:
+        files: tests/results/test-results.xml
+
+  validate:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Validate JSON schema
+      shell: pwsh
+      run: |
+        . .\core\utils.ps1
+        . .\core\validation.ps1
+
+        $result = Test-PackagesConfig -ConfigPath ".\config\packages.json"
+
+        if (-not $result.IsValid) {
+          Write-Error "packages.json validation failed"
+          exit 1
+        }
+
+        Write-Host "✓ packages.json is valid" -ForegroundColor Green
+
+    - name: Check script syntax
+      shell: pwsh
+      run: |
+        $errors = @()
+
+        Get-ChildItem -Path . -Filter "*.ps1" -Recurse | ForEach-Object {
+          $content = Get-Content $_.FullName -Raw
+          $tokens = $null
+          $parseErrors = $null
+
+          [System.Management.Automation.Language.Parser]::ParseInput($content, [ref]$tokens, [ref]$parseErrors) | Out-Null
+
+          if ($parseErrors) {
+            $errors += "Syntax error in $($_.FullName): $($parseErrors -join ', ')"
+          }
+        }
+
+        if ($errors.Count -gt 0) {
+          $errors | ForEach-Object { Write-Error $_ }
+          exit 1
+        }
+
+        Write-Host "✓ All PowerShell scripts have valid syntax" -ForegroundColor Green
+
+  security:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run PSScriptAnalyzer
+      shell: pwsh
+      run: |
+        Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
+
+        $results = Invoke-ScriptAnalyzer -Path . -Recurse -Settings PSGallery
+
+        if ($results) {
+          $results | ForEach-Object {
+            Write-Host "$($_.Severity): $($_.Message) in $($_.ScriptName):$($_.Line)" -ForegroundColor Yellow
+          }
+
+          $errors = $results | Where-Object { $_.Severity -eq 'Error' }
+          if ($errors) {
+            Write-Error "PSScriptAnalyzer found $($errors.Count) error(s)"
+            exit 1
+          }
+        }
+
+        Write-Host "✓ PSScriptAnalyzer passed" -ForegroundColor Green
+
+  integration:
+    runs-on: windows-latest
+    needs: [test, validate]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Test package manager detection
+      shell: pwsh
+      run: |
+        . .\core\utils.ps1
+        . .\core\packages.ps1
+
+        $health = Test-PackageManagerHealth
+
+        Write-Host "Package Manager Health Check:" -ForegroundColor Cyan
+        foreach ($manager in $health.Keys) {
+          $status = if ($health[$manager].Available) { "✓" } else { "✗" }
+          Write-Host "  $status $manager" -ForegroundColor $(if ($health[$manager].Available) { "Green" } else { "Red" })
+        }
+
+    - name: Test error handling
+      shell: pwsh
+      run: |
+        . .\core\utils.ps1
+        . .\core\error-handler.ps1
+
+        $prereqs = Test-Prerequisites
+
+        Write-Host "Prerequisites Check:" -ForegroundColor Cyan
+        foreach ($key in $prereqs.Keys) {
+          Write-Host "  $key : $($prereqs[$key])" -ForegroundColor Gray
+        }
+
+    - name: Test state manager
+      shell: pwsh
+      run: |
+        . .\core\utils.ps1
+        . .\core\state-manager.ps1
+
+        $sessionId = Start-InstallationSession
+        Write-Host "Created session: $sessionId" -ForegroundColor Green
+
+        Add-InstalledPackageToState -PackageId "ci-test-package" -Manager "test" -SessionId $sessionId
+
+        $state = Get-InstallationState
+        $package = $state.InstalledPackages | Where-Object { $_.PackageId -eq "ci-test-package" }
+
+        if (-not $package) {
+          Write-Error "Failed to add package to state"
+          exit 1
+        }
+
+        Stop-InstallationSession -SessionId $sessionId
+        Write-Host "✓ State manager working correctly" -ForegroundColor Green

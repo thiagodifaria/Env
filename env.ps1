@@ -1,19 +1,46 @@
-
+[CmdletBinding()]
 param(
+    [Parameter(Mandatory=$false)]
     [string]$Preset,
+
+    [Parameter(Mandatory=$false)]
     [string]$Language = "pt-br",
+
+    [Parameter(Mandatory=$false)]
     [switch]$Silent,
+
+    [Parameter(Mandatory=$false)]
     [switch]$SkipValidation,
-    [string[]]$Categories
+
+    [Parameter(Mandatory=$false)]
+    [switch]$SkipBackup,
+
+    [Parameter(Mandatory=$false)]
+    [switch]$NoCache,
+
+    [Parameter(Mandatory=$false)]
+    [string[]]$Categories,
+
+    [Parameter(Mandatory=$false)]
+    [ValidateRange(1, 10)]
+    [int]$MaxParallel = 3,
+
+    [Parameter(Mandatory=$false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$ConfigPath = "$PSScriptRoot\config\packages.json"
 )
 
 $ErrorActionPreference = "Continue"
+
 
 . "$PSScriptRoot\core\utils.ps1"
 . "$PSScriptRoot\core\logger.ps1"
 . "$PSScriptRoot\core\state.ps1"
 . "$PSScriptRoot\core\ui.ps1"
 . "$PSScriptRoot\core\validator.ps1"
+. "$PSScriptRoot\core\packages.ps1"
+. "$PSScriptRoot\core\backup.ps1"
+. "$PSScriptRoot\core\error-handler.ps1"
 
 . "$PSScriptRoot\installers\languages.ps1"
 . "$PSScriptRoot\installers\devtools.ps1"
@@ -23,6 +50,9 @@ $ErrorActionPreference = "Continue"
 . "$PSScriptRoot\installers\personal.ps1"
 . "$PSScriptRoot\installers\wsl.ps1"
 . "$PSScriptRoot\installers\npm-packages.ps1"
+
+. "$PSScriptRoot\utils\cache.ps1"
+. "$PSScriptRoot\utils\parallel.ps1"
 
 Initialize-Log
 Initialize-State
@@ -39,25 +69,44 @@ trap {
 function Test-Environment {
     Write-Host "$(Get-String 'checking' $Language)" -ForegroundColor Yellow
     Write-Host ""
-    
+
+    $prereqs = Test-Prerequisites
+
+    if ($prereqs.PowerShellVersion -lt [Version]"5.1") {
+        Write-Status "PowerShell 5.1 ou superior é necessário (atual: $($prereqs.PowerShellVersion))" "ERROR"
+        exit 1
+    }
+    Write-Status "PowerShell $($prereqs.PowerShellVersion)" "SUCCESS"
+
     if (-not (Test-Administrator)) {
         Write-Status "$(Get-String 'admin_required' $Language)" "ERROR"
+
+        if (-not $Silent) {
+            $response = Read-Host "Deseja reiniciar como administrador? (Y/N)"
+            if ($response -eq 'Y' -or $response -eq 'y') {
+                $arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+                if ($Preset) { $arguments += " -Preset $Preset" }
+                if ($Categories) { $arguments += " -Categories $($Categories -join ',')" }
+                Start-Process powershell -Verb RunAs -ArgumentList $arguments
+                exit
+            }
+        }
         exit 1
     }
     Write-Status "Administrador" "SUCCESS"
-    
+
     if (-not (Test-DiskSpace)) {
         Write-Status "$(Get-String 'disk_low' $Language)" "ERROR"
         exit 1
     }
     Write-Status "Espaço em disco" "SUCCESS"
-    
+
     if (-not (Test-NetworkConnection)) {
         Write-Status "$(Get-String 'no_internet' $Language)" "ERROR"
         exit 1
     }
     Write-Status "Conexão de internet" "SUCCESS"
-    
+
     if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
         Write-Host ""
         Write-Host "$(Get-String 'installing_choco' $Language)" -ForegroundColor Yellow
@@ -70,7 +119,29 @@ function Test-Environment {
     } else {
         Write-Status "$(Get-String 'choco_installed' $Language)" "SUCCESS"
     }
-    
+
+    if (-not $SkipBackup) {
+        Write-Host ""
+        Write-Host "Criando backup de configuração..." -ForegroundColor Cyan
+        try {
+            Backup-ConfigurationAuto | Out-Null
+            Write-Status "Backup criado com sucesso" "SUCCESS"
+        }
+        catch {
+            Write-Status "Aviso: Não foi possível criar backup" "WARNING"
+        }
+    }
+
+    Write-Host ""
+    Write-Host "Validando configuração..." -ForegroundColor Cyan
+    $configValid = Test-PackagesConfig -ConfigPath $ConfigPath
+
+    if (-not $configValid) {
+        Write-Status "Configuração de packages inválida" "ERROR"
+        exit 1
+    }
+    Write-Status "Configuração validada" "SUCCESS"
+
     Write-Host ""
     Write-Status "$(Get-String 'validation_ok' $Language)" "SUCCESS"
     Write-Host ""
@@ -243,150 +314,197 @@ function Start-Installation {
         [string]$Mode,
         [string[]]$CustomCategories = $null
     )
-    
+
     $startTime = Get-Date
-    
+
     Show-Box "Preparando instalação..." "Yellow"
-    
+
     $categorizedPackages = Get-PackagesForMode -Mode $Mode -SelectedCategories $CustomCategories
-    
+
     $totalPackages = 0
     foreach ($category in $categorizedPackages.Keys) {
         $totalPackages += $categorizedPackages[$category].Count
     }
-    
+
     Write-Log "Modo: $Mode - Total de pacotes: $totalPackages" "INFO"
-    
+
     $allPackages = @()
     foreach ($category in $categorizedPackages.Keys) {
         $allPackages += $categorizedPackages[$category]
     }
-    
+
+    $sessionId = $null
     if ($allPackages.Count -gt 0) {
-        $report = Get-ValidationReport -PackagesToInstall $allPackages -Language $Language
-        Show-ValidationReport -Report $report -Language $Language
-        
-        if ($report.Conflicts.Count -gt 0) {
-            Write-Host "Resolvendo conflitos..." -ForegroundColor Yellow
-            Write-Host ""
-            $resolutions = Resolve-Conflicts -Conflicts $report.Conflicts -Language $Language
-            
-            foreach ($resolution in $resolutions) {
-                if ($resolution.Action -eq "Skip") {
-                    foreach ($category in $categorizedPackages.Keys) {
-                        $categorizedPackages[$category] = $categorizedPackages[$category] | Where-Object {
-                            $_.name -ne $resolution.Package
+        $sessionId = Start-InstallationSession -Description "ENV Setup - Mode: $Mode"
+    }
+
+    try {
+        if ($allPackages.Count -gt 0) {
+            $report = Get-ValidationReport -PackagesToInstall $allPackages -Language $Language
+            Show-ValidationReport -Report $report -Language $Language
+
+            if ($report.Conflicts.Count -gt 0) {
+                Write-Host "Resolvendo conflitos..." -ForegroundColor Yellow
+                Write-Host ""
+                $resolutions = Resolve-Conflicts -Conflicts $report.Conflicts -Language $Language
+
+                foreach ($resolution in $resolutions) {
+                    if ($resolution.Action -eq "Skip") {
+                        foreach ($category in $categorizedPackages.Keys) {
+                            $categorizedPackages[$category] = $categorizedPackages[$category] | Where-Object {
+                                $_.name -ne $resolution.Package
+                            }
                         }
                     }
                 }
             }
-        }
-        
-        if ($report.ToInstall.Count -eq 0) {
-            Show-Box "Nenhum pacote para instalar. Tudo já está instalado!" "Green"
-            return
-        }
-        
-        if (-not $Silent) {
-            $confirm = Show-ConfirmationDialog -Message "Deseja prosseguir com a instalação?" -Language $Language
-            if (-not $confirm) {
-                Write-Host ""
-                Write-Host "Instalação cancelada pelo usuário" -ForegroundColor Yellow
+
+            if ($report.ToInstall.Count -eq 0) {
+                Show-Box "Nenhum pacote para instalar. Tudo já está instalado!" "Green"
+                if ($sessionId) {
+                    Stop-InstallationSession -SessionId $sessionId -Status 'Completed'
+                }
                 return
             }
-        }
-    }
-    
-    Show-Box "$(Get-String 'installation_starting' $Language)" "Yellow"
-    
-    $globalResults = @{
-        Success = @()
-        Failed = @()
-        Skipped = @()
-    }
-    
-    $categoryOrder = @("languages", "devtools", "webtools", "dbtools", "observability", "personal", "wsl", "npm")
-    $categoriesToInstall = $categoryOrder | Where-Object { $categorizedPackages.ContainsKey($_) }
-    $totalCategories = $categoriesToInstall.Count
-    $currentCategoryNum = 0
-    
-    foreach ($category in $categoriesToInstall) {
-        $currentCategoryNum++
-        
-        $categoryDisplayNames = @{
-            "languages" = "Linguagens de Programação"
-            "devtools" = "Ferramentas de Desenvolvimento"
-            "webtools" = "Ferramentas Web"
-            "dbtools" = "Banco de Dados"
-            "observability" = "Observabilidade"
-            "personal" = "Aplicativos Pessoais"
-            "wsl" = "Windows Subsystem for Linux"
-            "npm" = "Pacotes NPM"
-        }
-        
-        Show-GlobalProgress -CurrentCategory $currentCategoryNum -TotalCategories $totalCategories -CategoryName $categoryDisplayNames[$category]
-        
-        $packages = $categorizedPackages[$category]
-        
-        if ($category -eq "wsl" -or $packages.Count -eq 0) {
-            if ($category -eq "wsl") {
-                $result = Install-WSL
-                $globalResults.Success += $result.Success
-                $globalResults.Failed += $result.Failed
-                $globalResults.Skipped += $result.Skipped
+
+            if (-not $Silent) {
+                $confirm = Show-ConfirmationDialog -Message "Deseja prosseguir com a instalação?" -Language $Language
+                if (-not $confirm) {
+                    Write-Host ""
+                    Write-Host "Instalação cancelada pelo usuário" -ForegroundColor Yellow
+                    if ($sessionId) {
+                        Stop-InstallationSession -SessionId $sessionId -Status 'Cancelled'
+                    }
+                    return
+                }
             }
-            continue
         }
-        
-        $result = switch ($category) {
-            "languages" { Install-Languages -PackagesToInstall $packages }
-            "devtools" { Install-DevTools -PackagesToInstall $packages }
-            "webtools" { Install-WebTools -PackagesToInstall $packages }
-            "dbtools" { Install-DBTools -PackagesToInstall $packages }
-            "observability" { Install-Observability -PackagesToInstall $packages }
-            "personal" { Install-Personal -PackagesToInstall $packages }
-            "npm" { Install-NPMPackages -PackagesToInstall $packages }
+
+        Show-Box "$(Get-String 'installation_starting' $Language)" "Yellow"
+
+        $globalResults = @{
+            Success = @()
+            Failed = @()
+            Skipped = @()
         }
-        
-        $globalResults.Success += $result.Success
-        $globalResults.Failed += $result.Failed
-        $globalResults.Skipped += $result.Skipped
-    }
-    
-    $endTime = Get-Date
-    $duration = $endTime - $startTime
-    
-    Write-Host ""
-    Show-Box "$(Get-String 'installation_complete' $Language)" "Green"
-    
-    Show-FinalReport -Results $globalResults -Duration $duration -LogPath $script:LogFile -Language $Language
-    
-    if ($globalResults.Failed.Count -gt 0 -and -not $Silent) {
-        $retry = Show-ConfirmationDialog -Message "Deseja tentar reinstalar os pacotes que falharam?" -Language $Language
-        
-        if ($retry) {
-            $retryResults = Retry-FailedPackages -FailedPackages $globalResults.Failed -Language $Language
-            
-            $globalResults.Success += $retryResults.Success
-            $globalResults.Failed = $retryResults.Failed
-            
+
+        $categoryOrder = @("languages", "devtools", "webtools", "dbtools", "observability", "personal", "wsl", "npm")
+        $categoriesToInstall = $categoryOrder | Where-Object { $categorizedPackages.ContainsKey($_) }
+        $totalCategories = $categoriesToInstall.Count
+        $currentCategoryNum = 0
+
+        foreach ($category in $categoriesToInstall) {
+            $currentCategoryNum++
+
+            $categoryDisplayNames = @{
+                "languages" = "Linguagens de Programação"
+                "devtools" = "Ferramentas de Desenvolvimento"
+                "webtools" = "Ferramentas Web"
+                "dbtools" = "Banco de Dados"
+                "observability" = "Observabilidade"
+                "personal" = "Aplicativos Pessoais"
+                "wsl" = "Windows Subsystem for Linux"
+                "npm" = "Pacotes NPM"
+            }
+
+            Show-GlobalProgress -CurrentCategory $currentCategoryNum -TotalCategories $totalCategories -CategoryName $categoryDisplayNames[$category]
+
+            $packages = $categorizedPackages[$category]
+
+            if ($category -eq "wsl" -or $packages.Count -eq 0) {
+                if ($category -eq "wsl") {
+                    $result = Install-WSL
+                    $globalResults.Success += $result.Success
+                    $globalResults.Failed += $result.Failed
+                    $globalResults.Skipped += $result.Skipped
+                }
+                continue
+            }
+
+            $result = switch ($category) {
+                "languages" { Install-Languages -PackagesToInstall $packages }
+                "devtools" { Install-DevTools -PackagesToInstall $packages }
+                "webtools" { Install-WebTools -PackagesToInstall $packages }
+                "dbtools" { Install-DBTools -PackagesToInstall $packages }
+                "observability" { Install-Observability -PackagesToInstall $packages }
+                "personal" { Install-Personal -PackagesToInstall $packages }
+                "npm" { Install-NPMPackages -PackagesToInstall $packages }
+            }
+
+            $globalResults.Success += $result.Success
+            $globalResults.Failed += $result.Failed
+            $globalResults.Skipped += $result.Skipped
+        }
+
+        $endTime = Get-Date
+        $duration = $endTime - $startTime
+
+        Write-Host ""
+        Show-Box "$(Get-String 'installation_complete' $Language)" "Green"
+
+        Show-FinalReport -Results $globalResults -Duration $duration -LogPath $script:LogFile -Language $Language
+
+        if ($sessionId) {
+            if ($globalResults.Failed.Count -gt 0) {
+                Stop-InstallationSession -SessionId $sessionId -Status 'Failed'
+            } else {
+                Stop-InstallationSession -SessionId $sessionId -Status 'Completed'
+            }
+        }
+
+        if ($globalResults.Failed.Count -gt 0 -and -not $Silent) {
+            $retry = Show-ConfirmationDialog -Message "Deseja tentar reinstalar os pacotes que falharam?" -Language $Language
+
+            if ($retry) {
+                $retryResults = Retry-FailedPackages -FailedPackages $globalResults.Failed -Language $Language
+
+                $globalResults.Success += $retryResults.Success
+                $globalResults.Failed = $retryResults.Failed
+
+                Write-Host ""
+                Write-Host "Resultado final após retry:" -ForegroundColor Cyan
+                Write-Host "  ✓ Total instalados: $($globalResults.Success.Count)" -ForegroundColor Green
+                Write-Host "  ✗ Total falhados: $($globalResults.Failed.Count)" -ForegroundColor Red
+                Write-Host ""
+            }
+        }
+
+        Export-LogReport -Report $globalResults
+
+        if ($categoriesToInstall -contains "wsl" -and $globalResults.Success -match "WSL") {
             Write-Host ""
-            Write-Host "Resultado final após retry:" -ForegroundColor Cyan
-            Write-Host "  ✓ Total instalados: $($globalResults.Success.Count)" -ForegroundColor Green
-            Write-Host "  ✗ Total falhados: $($globalResults.Failed.Count)" -ForegroundColor Red
+            Write-Host "  ATENÇÃO: REINICIALIZAÇÃO NECESSÁRIA  " -ForegroundColor Yellow
+            Write-Host ""
+            Write-Host "O WSL foi instalado e requer reinicialização do sistema." -ForegroundColor White
+            Write-Host "Após reiniciar, você precisará configurar o Ubuntu na primeira execução." -ForegroundColor White
+            Write-Host ""
+        }
+
+        if ($globalResults.Success.Count -gt 0) {
+            Write-Host ""
+            Write-Host "Próximos passos:" -ForegroundColor Cyan
+            Write-Host "  1. Reinicie o terminal para aplicar as mudanças" -ForegroundColor Gray
+            Write-Host "  2. Execute 'Get-InstalledPackagesFromState' para ver packages instalados" -ForegroundColor Gray
+            Write-Host "  3. Configure seu terminal com 'Set-CustomPrompt'" -ForegroundColor Gray
             Write-Host ""
         }
     }
-    
-    Export-LogReport -Report $globalResults
-    
-    if ($categoriesToInstall -contains "wsl" -and $globalResults.Success -match "WSL") {
+    catch {
+        Write-ErrorLog -ErrorMessage $_.Exception.Message -Context @{
+            Operation = "Installation"
+            SessionId = $sessionId
+            Mode = $Mode
+        }
+
+        if ($sessionId) {
+            Stop-InstallationSession -SessionId $sessionId -Status 'Failed'
+        }
+
         Write-Host ""
-        Write-Host "  ATENÇÃO: REINICIALIZAÇÃO NECESSÁRIA  " -ForegroundColor Yellow
-        Write-Host ""
-        Write-Host "O WSL foi instalado e requer reinicialização do sistema." -ForegroundColor White
-        Write-Host "Após reiniciar, você precisará configurar o Ubuntu na primeira execução." -ForegroundColor White
-        Write-Host ""
+        Write-Host "Erro durante instalação: $_" -ForegroundColor Red
+        Write-Host "Verifique os logs em: $(Get-EnvRoot)\logs" -ForegroundColor Yellow
+
+        throw
     }
 }
 

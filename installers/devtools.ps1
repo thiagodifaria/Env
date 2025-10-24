@@ -41,8 +41,16 @@ function Install-DevTools {
             $attempts++
             
             try {
-                choco install $pkg.choco_package -y --no-progress 2>&1 | Out-Null
-                
+                $chocoArgs = @($pkg.choco_package, '-y', '--no-progress')
+
+                if ($pkg.checksum -and $pkg.checksum -ne "") {
+                    $chocoArgs += "--checksum=$($pkg.checksum)"
+                    $chocoArgs += "--checksum-type=$($pkg.checksumType)"
+                    Write-Verbose "Usando checksum para validação"
+                }
+
+                choco install $chocoArgs 2>&1 | Out-Null
+
                 if (Test-PackageInstalled -PackageName $pkg.choco_package) {
                     $success = $true
                     Write-Status "$($pkg.name) instalado com sucesso" "SUCCESS"

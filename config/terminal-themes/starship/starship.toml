@@ -1,0 +1,140 @@
+format = """
+[┌───────────────────>](bold green)
+[│](bold green)$username\
+$hostname\
+$localip\
+$shlvl\
+$singularity\
+$kubernetes\
+$directory\
+$vcsh\
+$git_branch\
+$git_commit\
+$git_state\
+$git_metrics\
+$git_status\
+$hg_branch\
+$docker_context\
+$package\
+$buf\
+$c\
+$cmake\
+$cobol\
+$container\
+$daml\
+$dart\
+$deno\
+$dotnet\
+$elixir\
+$elm\
+$erlang\
+$golang\
+$haskell\
+$helm\
+$java\
+$julia\
+$kotlin\
+$lua\
+$nim\
+$nodejs\
+$ocaml\
+$perl\
+$php\
+$pulumi\
+$purescript\
+$python\
+$raku\
+$rlang\
+$red\
+$ruby\
+$rust\
+$scala\
+$swift\
+$terraform\
+$vlang\
+$vagrant\
+$zig\
+$nix_shell\
+$conda\
+$memory_usage\
+$aws\
+$gcloud\
+$openstack\
+$azure\
+$env_var\
+$crystal\
+$custom\
+$sudo\
+$cmd_duration\
+$line_break\
+$jobs\
+$battery\
+$time\
+$status\
+$shell\
+$character"""
+
+[username]
+style_user = "green bold"
+style_root = "red bold"
+format = "[$user]($style) "
+disabled = false
+show_always = true
+
+[hostname]
+ssh_only = false
+format = "on [$hostname](bold yellow) "
+disabled = false
+
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+format = "at [$path]($style)[$read_only]($read_only_style) "
+style = "cyan bold"
+
+[git_branch]
+symbol = " "
+format = "on [$symbol$branch]($style) "
+style = "bold purple"
+
+[git_status]
+format = "([$all_status$ahead_behind]($style) )"
+style = "bold red"
+
+[nodejs]
+format = "via [ $version](bold green) "
+
+[python]
+format = "via [ $version](bold yellow) "
+
+[rust]
+format = "via [ $version](bold red) "
+
+[golang]
+format = "via [ $version](bold cyan) "
+
+[package]
+format = "is [ $version](bold blue) "
+
+[cmd_duration]
+min_time = 500
+format = "took [$duration](bold yellow) "
+
+[time]
+disabled = false
+format = "at [ $time]($style) "
+style = "bold white"
+time_format = "%T"
+
+[character]
+success_symbol = "[└─>](bold green)"
+error_symbol = "[└─>](bold red)"
+
+[battery]
+full_symbol = " "
+charging_symbol = " "
+discharging_symbol = " "
+
+[[battery.display]]
+threshold = 30
+style = "bold red"

@@ -1,0 +1,208 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/ENV/packages.schema.json",
+  "title": "ENV Packages Configuration",
+  "description": "Schema for ENV Windows Development Environment package configuration",
+  "type": "object",
+  "properties": {
+    "languages": {
+      "type": "array",
+      "description": "Programming languages and runtimes",
+      "items": { "$ref": "#/definitions/package" }
+    },
+    "devtools": {
+      "type": "array",
+      "description": "Development tools and utilities",
+      "items": { "$ref": "#/definitions/package" }
+    },
+    "webtools": {
+      "type": "array",
+      "description": "Web development tools",
+      "items": { "$ref": "#/definitions/package" }
+    },
+    "dbtools": {
+      "type": "array",
+      "description": "Database tools and clients",
+      "items": { "$ref": "#/definitions/package" }
+    },
+    "observability": {
+      "type": "array",
+      "description": "Monitoring and observability tools",
+      "items": { "$ref": "#/definitions/package" }
+    },
+    "personal": {
+      "type": "array",
+      "description": "Personal and productivity applications",
+      "items": { "$ref": "#/definitions/package" }
+    },
+    "wsl": {
+      "type": "array",
+      "description": "WSL distributions",
+      "items": { "$ref": "#/definitions/package" }
+    },
+    "npm": {
+      "type": "array",
+      "description": "NPM global packages",
+      "items": { "$ref": "#/definitions/npmPackage" }
+    }
+  },
+  "definitions": {
+    "package": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique package identifier",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable package name",
+          "minLength": 1
+        },
+        "choco_package": {
+          "type": "string",
+          "description": "Chocolatey package ID"
+        },
+        "winget_id": {
+          "type": "string",
+          "description": "Winget package ID"
+        },
+        "scoop_name": {
+          "type": "string",
+          "description": "Scoop package name"
+        },
+        "version": {
+          "type": "string",
+          "description": "Package version or 'latest'",
+          "default": "latest"
+        },
+        "command": {
+          "type": ["string", "null"],
+          "description": "Command to verify installation"
+        },
+        "checksum": {
+          "type": "string",
+          "description": "Package checksum for verification",
+          "pattern": "^[A-Fa-f0-9]*$"
+        },
+        "checksumType": {
+          "type": "string",
+          "description": "Checksum algorithm",
+          "enum": ["sha256", "sha512", "sha1", "md5"],
+          "default": "sha256"
+        },
+        "tags": {
+          "type": "array",
+          "description": "Tags for categorization and filtering",
+          "items": {
+            "type": "string"
+          }
+        },
+        "description": {
+          "type": "string",
+          "description": "Package description"
+        },
+        "homepage": {
+          "type": "string",
+          "description": "Package homepage URL",
+          "format": "uri"
+        },
+        "license": {
+          "type": "string",
+          "description": "Package license"
+        },
+        "size_mb": {
+          "type": "number",
+          "description": "Approximate package size in MB",
+          "minimum": 0
+        },
+        "install_time_min": {
+          "type": "number",
+          "description": "Estimated installation time in minutes",
+          "minimum": 0
+        },
+        "dependencies": {
+          "type": "array",
+          "description": "Package IDs that must be installed first",
+          "items": {
+            "type": "string"
+          }
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "Whether package is optional",
+          "default": false
+        },
+        "managers": {
+          "type": "array",
+          "description": "Multiple package manager configurations",
+          "items": {
+            "$ref": "#/definitions/managerConfig"
+          }
+        }
+      },
+      "anyOf": [
+        { "required": ["choco_package"] },
+        { "required": ["winget_id"] },
+        { "required": ["scoop_name"] },
+        { "required": ["managers"] }
+      ]
+    },
+    "managerConfig": {
+      "type": "object",
+      "required": ["type", "id"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["chocolatey", "winget", "scoop"],
+          "description": "Package manager type"
+        },
+        "id": {
+          "type": "string",
+          "description": "Package ID for this manager"
+        },
+        "priority": {
+          "type": "number",
+          "description": "Installation priority (lower = higher priority)",
+          "minimum": 1,
+          "default": 1
+        }
+      }
+    },
+    "npmPackage": {
+      "type": "object",
+      "required": ["id", "name", "npm_package"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique package identifier",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable package name"
+        },
+        "npm_package": {
+          "type": "string",
+          "description": "NPM package name"
+        },
+        "command": {
+          "type": ["string", "null"],
+          "description": "Command to verify installation"
+        },
+        "version": {
+          "type": "string",
+          "description": "Package version or 'latest'",
+          "default": "latest"
+        },
+        "global": {
+          "type": "boolean",
+          "description": "Install globally",
+          "default": true
+        }
+      }
+    }
+  }
+}

@@ -140,7 +140,9 @@
       "name": "Git",
       "choco_package": "git",
       "version": "latest",
-      "command": "git"
+      "command": "git",
+      "checksum": "",
+      "checksumType": "sha256"
     },
     {
       "id": "docker-desktop",

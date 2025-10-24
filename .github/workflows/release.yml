@@ -1,0 +1,161 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Get version from tag
+      id: get_version
+      shell: pwsh
+      run: |
+        $version = $env:GITHUB_REF -replace 'refs/tags/v', ''
+        if (-not $version) {
+          $version = "1.0.0"
+        }
+        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+
+    - name: Run all tests
+      shell: pwsh
+      run: |
+        Install-Module -Name Pester -Force -SkipPublisherCheck -Scope CurrentUser -MinimumVersion 5.0
+        .\tests\run-tests.ps1 -TestType All -CodeCoverage -MinimumCoverage 70
+
+    - name: Validate all configurations
+      shell: pwsh
+      run: |
+        . .\core\utils.ps1
+        . .\core\validation.ps1
+
+        $result = Test-PackagesConfig -ConfigPath ".\config\packages.json"
+
+        if (-not $result.IsValid) {
+          Write-Error "Configuration validation failed"
+          exit 1
+        }
+
+    - name: Create release archive
+      shell: pwsh
+      run: |
+        $version = "${{ steps.get_version.outputs.VERSION }}"
+        $archiveName = "ENV-$version.zip"
+
+        $filesToInclude = @(
+          "core",
+          "installers",
+          "utils",
+          "ui",
+          "config",
+          "setup.ps1",
+          "README.md",
+          "LICENSE"
+        )
+
+        Compress-Archive -Path $filesToInclude -DestinationPath $archiveName -CompressionLevel Optimal
+
+        echo "ARCHIVE_NAME=$archiveName" >> $env:GITHUB_ENV
+
+    - name: Generate checksums
+      shell: pwsh
+      run: |
+        $archiveName = $env:ARCHIVE_NAME
+        $sha256 = (Get-FileHash -Path $archiveName -Algorithm SHA256).Hash
+        $sha512 = (Get-FileHash -Path $archiveName -Algorithm SHA512).Hash
+
+        $checksums = @"
+# Checksums for $archiveName
+
+SHA256: $sha256
+SHA512: $sha512
+
+## Verification
+
+PowerShell:
+```powershell
+`$hash = (Get-FileHash -Path '$archiveName' -Algorithm SHA256).Hash
+if (`$hash -eq '$sha256') { Write-Host 'Checksum verified' -ForegroundColor Green }
+```
+"@
+
+        $checksums | Out-File -FilePath "checksums.txt" -Encoding UTF8
+
+    - name: Create release notes
+      shell: pwsh
+      run: |
+        $version = "${{ steps.get_version.outputs.VERSION }}"
+
+        $releaseNotes = @"
+# ENV v$version
+
+Windows Development Environment Setup Tool
+
+## Installation
+
+1. Download ENV-$version.zip
+2. Verify checksums (see checksums.txt)
+3. Extract the archive
+4. Run setup.ps1 with administrator privileges
+
+```powershell
+Expand-Archive -Path ENV-$version.zip -DestinationPath C:\ENV
+cd C:\ENV
+.\setup.ps1
+```
+
+## Features
+
+- Multi-package manager support (Chocolatey, Winget, Scoop)
+- Automatic fallback between package managers
+- Comprehensive error handling and logging
+- State management and rollback capability
+- Configuration backup and restore
+- Modern CLI tools integration (bat, eza, fzf, ripgrep, zoxide)
+- Terminal customization (Oh My Posh, Starship)
+- Git auto-configuration
+- Dotfiles synchronization
+- Parallel package installation
+- Smart caching system
+- Full test coverage with Pester
+
+## Requirements
+
+- Windows 10/11
+- PowerShell 5.1 or higher
+- Administrator privileges
+
+## Documentation
+
+See README.md for detailed documentation and usage instructions.
+"@
+
+        $releaseNotes | Out-File -FilePath "release-notes.md" -Encoding UTF8
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ${{ env.ARCHIVE_NAME }}
+          checksums.txt
+        body_path: release-notes.md
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload release artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-package
+        path: |
+          ${{ env.ARCHIVE_NAME }}
+          checksums.txt
+          release-notes.md

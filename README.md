@@ -15,7 +15,7 @@
 
 ## 🌍 **Documentation / Documentação**
 
-**📖 [🇺🇸 Read in English](README_EN.md)**
+**📖 [🇺🇸 Read in English](README_EN.md)**  
 **📖 [🇧🇷 Leia em Português](README_PT.md)**
 
 ---

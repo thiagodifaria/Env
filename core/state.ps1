@@ -1,4 +1,4 @@
-function Get-StateFilePath {
+﻿function Get-StateFilePath {
     [CmdletBinding()]
     param()
 
@@ -432,11 +432,11 @@ function Invoke-Rollback {
             if ($result) {
                 Remove-PackageFromState -PackageId $packageId
                 $successCount++
-                Write-Host "  ✓ $($packageInfo.PackageName) desinstalado" -ForegroundColor Green
+                Write-Host "  [OK] $($packageInfo.PackageName) desinstalado" -ForegroundColor Green
             }
             else {
                 $failCount++
-                Write-Host "  ✗ Falha ao desinstalar $($packageInfo.PackageName)" -ForegroundColor Red
+                Write-Host "  [X] Falha ao desinstalar $($packageInfo.PackageName)" -ForegroundColor Red
             }
         }
 

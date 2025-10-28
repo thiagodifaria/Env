@@ -1,4 +1,4 @@
-function Export-Dotfiles {
+﻿function Export-Dotfiles {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
@@ -33,11 +33,11 @@ function Export-Dotfiles {
 
                 Copy-Item -Path $file.Source -Destination $destPath -Force
                 $exported++
-                Write-Host "  ✓ $($file.Dest)" -ForegroundColor Green
+                Write-Host "  [OK] $($file.Dest)" -ForegroundColor Green
             }
         }
 
-        Write-Host "`n✓ $exported dotfiles exportados para: $Destination" -ForegroundColor Green
+        Write-Host "`n[OK] $exported dotfiles exportados para: $Destination" -ForegroundColor Green
         return $Destination
     }
     catch {
@@ -82,11 +82,11 @@ function Import-Dotfiles {
 
                 Copy-Item -Path $sourcePath -Destination $file.Dest -Force
                 $imported++
-                Write-Host "  ✓ $($file.Source)" -ForegroundColor Green
+                Write-Host "  [OK] $($file.Source)" -ForegroundColor Green
             }
         }
 
-        Write-Host "`n✓ $imported dotfiles importados" -ForegroundColor Green
+        Write-Host "`n[OK] $imported dotfiles importados" -ForegroundColor Green
         return $true
     }
     catch {
@@ -110,13 +110,13 @@ function Sync-Dotfiles {
 
         if (-not (Test-Path $dotfilesDir)) {
             git clone $RemoteRepo $dotfilesDir
-            Write-Host "✓ Repositório clonado" -ForegroundColor Green
+            Write-Host "[OK] Repositório clonado" -ForegroundColor Green
         }
         else {
             Push-Location $dotfilesDir
             git pull origin main
             Pop-Location
-            Write-Host "✓ Repositório atualizado" -ForegroundColor Green
+            Write-Host "[OK] Repositório atualizado" -ForegroundColor Green
         }
 
         Import-Dotfiles -Source $dotfilesDir
@@ -160,7 +160,7 @@ function Initialize-DotfilesRepo {
 
         Pop-Location
 
-        Write-Host "✓ Repositório dotfiles inicializado: $dotfilesDir" -ForegroundColor Green
+        Write-Host "[OK] Repositório dotfiles inicializado: $dotfilesDir" -ForegroundColor Green
         return $dotfilesDir
     }
     catch {
@@ -191,7 +191,7 @@ function Push-Dotfiles {
 
         Pop-Location
 
-        Write-Host "✓ Dotfiles enviados para o repositório" -ForegroundColor Green
+        Write-Host "[OK] Dotfiles enviados para o repositório" -ForegroundColor Green
         return $true
     }
     catch {
@@ -218,7 +218,7 @@ function Pull-Dotfiles {
 
         Import-Dotfiles -Source $dotfilesDir
 
-        Write-Host "✓ Dotfiles atualizados do repositório" -ForegroundColor Green
+        Write-Host "[OK] Dotfiles atualizados do repositório" -ForegroundColor Green
         return $true
     }
     catch {

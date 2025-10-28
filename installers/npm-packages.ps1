@@ -1,4 +1,4 @@
-function Install-NPMPackages {
+﻿function Install-NPMPackages {
     param(
         [array]$PackagesToInstall
     )
@@ -53,7 +53,7 @@ function Install-NPMPackages {
                     $success = $true
                     Write-Status "$($pkg.name) instalado com sucesso" "SUCCESS"
                     $results.Success += $pkg.name
-                    Write-Log "✓ $($pkg.name) instalado via NPM" "SUCCESS"
+                    Write-Log "[OK] $($pkg.name) instalado via NPM" "SUCCESS"
                 }
             }
             catch {
@@ -67,7 +67,7 @@ function Install-NPMPackages {
         if (-not $success) {
             Write-Status "$($pkg.name) falhou após 3 tentativas" "ERROR"
             $results.Failed += $pkg.name
-            Write-Log "✗ $($pkg.name) falhou" "ERROR"
+            Write-Log "[X] $($pkg.name) falhou" "ERROR"
         }
     }
     

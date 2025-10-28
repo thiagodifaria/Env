@@ -1,4 +1,4 @@
-function Get-BestPackageManager {
+﻿function Get-BestPackageManager {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
@@ -114,7 +114,7 @@ function Install-PackageWithFallback {
                 $result = Install-PackageWithManager -Package $Package -Manager $manager
 
                 if ($result.Success) {
-                    Write-Host "✓ $($Package.name) instalado com sucesso via $($manager.type)" -ForegroundColor Green
+                    Write-Host "[OK] $($Package.name) instalado com sucesso via $($manager.type)" -ForegroundColor Green
                     return @{
                         Success = $true
                         Manager = $manager.type

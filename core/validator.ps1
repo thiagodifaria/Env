@@ -1,4 +1,4 @@
-function Test-PackageInstalled {
+﻿function Test-PackageInstalled {
     param(
         [string]$PackageName,
         [string]$Command = $null
@@ -329,7 +329,7 @@ function Show-ConflictDialog {
     )
 
     Write-Host ""
-    Write-Host "⚠ Conflito detectado:" -ForegroundColor Yellow
+    Write-Host "[!] Conflito detectado:" -ForegroundColor Yellow
     Write-Host "  Package: $($Conflict.Package)" -ForegroundColor White
     Write-Host "  Conflito: $($Conflict.Conflict)" -ForegroundColor White
     Write-Host "  Ação: $($Conflict.Action)" -ForegroundColor Gray
@@ -442,9 +442,9 @@ function Show-ValidationReport {
     Write-Host ""
 
     if ($Report.AlreadyInstalled.Count -gt 0) {
-        Write-Host "✓ Já instalados: $($Report.AlreadyInstalled.Count) pacotes" -ForegroundColor Green
+        Write-Host "[OK] Já instalados: $($Report.AlreadyInstalled.Count) pacotes" -ForegroundColor Green
         foreach ($pkg in $Report.AlreadyInstalled | Select-Object -First 5) {
-            Write-Host "  ⟲ $($pkg.name)" -ForegroundColor Cyan
+            Write-Host "  [~] $($pkg.name)" -ForegroundColor Cyan
         }
         if ($Report.AlreadyInstalled.Count -gt 5) {
             Write-Host "  ... e mais $($Report.AlreadyInstalled.Count - 5) pacotes" -ForegroundColor Gray
@@ -455,7 +455,7 @@ function Show-ValidationReport {
     if ($Report.ToInstall.Count -gt 0) {
         Write-Host "➜ Serão instalados: $($Report.ToInstall.Count) pacotes" -ForegroundColor Yellow
         foreach ($pkg in $Report.ToInstall | Select-Object -First 5) {
-            Write-Host "  • $($pkg.name)" -ForegroundColor White
+            Write-Host "  [*] $($pkg.name)" -ForegroundColor White
         }
         if ($Report.ToInstall.Count -gt 5) {
             Write-Host "  ... e mais $($Report.ToInstall.Count - 5) pacotes" -ForegroundColor Gray
@@ -464,9 +464,9 @@ function Show-ValidationReport {
     }
 
     if ($Report.Conflicts.Count -gt 0) {
-        Write-Host "⚠ Conflitos detectados: $($Report.Conflicts.Count)" -ForegroundColor Yellow
+        Write-Host "[!] Conflitos detectados: $($Report.Conflicts.Count)" -ForegroundColor Yellow
         foreach ($conflict in $Report.Conflicts) {
-            Write-Host "  ⚠ $($conflict.Package) - $($conflict.Conflict)" -ForegroundColor Yellow
+            Write-Host "  [!] $($conflict.Package) - $($conflict.Conflict)" -ForegroundColor Yellow
         }
         Write-Host ""
     }

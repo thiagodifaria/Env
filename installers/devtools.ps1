@@ -1,4 +1,4 @@
-function Install-DevTools {
+﻿function Install-DevTools {
     param(
         [array]$PackagesToInstall
     )
@@ -56,7 +56,7 @@ function Install-DevTools {
                     Write-Status "$($pkg.name) instalado com sucesso" "SUCCESS"
                     Add-InstalledPackage -PackageName $pkg.choco_package
                     $results.Success += $pkg.name
-                    Write-Log "✓ $($pkg.name) instalado" "SUCCESS"
+                    Write-Log "[OK] $($pkg.name) instalado" "SUCCESS"
                 }
             }
             catch {
@@ -70,7 +70,7 @@ function Install-DevTools {
         if (-not $success) {
             Write-Status "$($pkg.name) falhou após 3 tentativas" "ERROR"
             $results.Failed += $pkg.name
-            Write-Log "✗ $($pkg.name) falhou" "ERROR"
+            Write-Log "[X] $($pkg.name) falhou" "ERROR"
         }
     }
     

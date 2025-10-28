@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [Parameter(Mandatory=$false)]
     [ValidateSet('Unit', 'Integration', 'All')]
@@ -92,11 +92,11 @@ try {
     }
 
     if ($result.FailedCount -gt 0) {
-        Write-Host "`n✗ Testes falharam" -ForegroundColor Red
+        Write-Host "`n[X] Testes falharam" -ForegroundColor Red
         exit 1
     }
 
-    Write-Host "`n✓ Todos os testes passaram" -ForegroundColor Green
+    Write-Host "`n[OK] Todos os testes passaram" -ForegroundColor Green
     exit 0
 }
 catch {

@@ -1,4 +1,4 @@
-function Install-WSL {
+﻿function Install-WSL {
     Write-Log "Iniciando instalação do WSL" "INFO"
     Show-Box "Instalando Windows Subsystem for Linux" "Cyan"
     
@@ -41,7 +41,7 @@ function Install-WSL {
             if ($LASTEXITCODE -eq 0) {
                 Write-Status "Ubuntu instalado com sucesso" "SUCCESS"
                 $results.Success += "WSL Ubuntu"
-                Write-Log "✓ WSL e Ubuntu instalados" "SUCCESS"
+                Write-Log "[OK] WSL e Ubuntu instalados" "SUCCESS"
                 
                 Write-Host ""
                 Write-Host "ATENÇÃO: É necessário reiniciar o sistema para concluir a instalação do WSL" -ForegroundColor Yellow
@@ -53,7 +53,7 @@ function Install-WSL {
         catch {
             Write-Status "Erro ao instalar WSL: $_" "ERROR"
             $results.Failed += "WSL"
-            Write-Log "✗ WSL falhou: $_" "ERROR"
+            Write-Log "[X] WSL falhou: $_" "ERROR"
         }
     }
     

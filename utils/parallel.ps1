@@ -1,4 +1,4 @@
-function Invoke-ParallelInstall {
+﻿function Invoke-ParallelInstall {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
@@ -83,11 +83,11 @@ function Invoke-ParallelInstall {
 
                     if ($jobResult.Success) {
                         $results.Success += $jobResult.PackageName
-                        Write-Host "  ✓ $($jobResult.PackageName)" -ForegroundColor Green
+                        Write-Host "  [OK] $($jobResult.PackageName)" -ForegroundColor Green
                     }
                     else {
                         $results.Failed += $jobResult.PackageName
-                        Write-Host "  ✗ $($jobResult.PackageName)" -ForegroundColor Red
+                        Write-Host "  [X] $($jobResult.PackageName)" -ForegroundColor Red
                     }
                 }
             }
@@ -109,16 +109,16 @@ function Invoke-ParallelInstall {
 
                     if ($installResult.Success) {
                         $results.Success += $pkg.name
-                        Write-Host "  ✓ $($pkg.name)" -ForegroundColor Green
+                        Write-Host "  [OK] $($pkg.name)" -ForegroundColor Green
                     }
                     else {
                         $results.Failed += $pkg.name
-                        Write-Host "  ✗ $($pkg.name)" -ForegroundColor Red
+                        Write-Host "  [X] $($pkg.name)" -ForegroundColor Red
                     }
                 }
                 catch {
                     $results.Failed += $pkg.name
-                    Write-Host "  ✗ $($pkg.name): $_" -ForegroundColor Red
+                    Write-Host "  [X] $($pkg.name): $_" -ForegroundColor Red
                 }
             }
         }

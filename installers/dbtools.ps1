@@ -1,4 +1,4 @@
-function Install-DBTools {
+﻿function Install-DBTools {
     param(
         [array]$PackagesToInstall
     )
@@ -48,7 +48,7 @@ function Install-DBTools {
                     Write-Status "$($pkg.name) instalado com sucesso" "SUCCESS"
                     Add-InstalledPackage -PackageName $pkg.choco_package
                     $results.Success += $pkg.name
-                    Write-Log "✓ $($pkg.name) instalado" "SUCCESS"
+                    Write-Log "[OK] $($pkg.name) instalado" "SUCCESS"
                 }
             }
             catch {
@@ -62,7 +62,7 @@ function Install-DBTools {
         if (-not $success) {
             Write-Status "$($pkg.name) falhou após 3 tentativas" "ERROR"
             $results.Failed += $pkg.name
-            Write-Log "✗ $($pkg.name) falhou" "ERROR"
+            Write-Log "[X] $($pkg.name) falhou" "ERROR"
         }
     }
     

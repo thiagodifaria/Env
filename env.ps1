@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [Parameter(Mandatory=$false)]
     [string]$Preset,
@@ -30,29 +30,45 @@ param(
     [string]$ConfigPath = "$PSScriptRoot\config\packages.json"
 )
 
+try {
+    $projectRoot = $PSScriptRoot
+    Get-ChildItem -Path $projectRoot -Recurse -Filter "*.ps1" -ErrorAction SilentlyContinue | 
+        ForEach-Object {
+            Unblock-File -Path $_.FullName -ErrorAction SilentlyContinue
+        }
+}
+catch {
+}
+
 $ErrorActionPreference = "Continue"
 
+try {
+    . "$PSScriptRoot\core\utils.ps1"
+    . "$PSScriptRoot\core\logger.ps1"
+    . "$PSScriptRoot\core\state.ps1"
+    . "$PSScriptRoot\core\ui.ps1"
+    . "$PSScriptRoot\core\validator.ps1"
+    . "$PSScriptRoot\core\packages.ps1"
+    . "$PSScriptRoot\core\backup.ps1"
+    . "$PSScriptRoot\core\error-handler.ps1"
 
-. "$PSScriptRoot\core\utils.ps1"
-. "$PSScriptRoot\core\logger.ps1"
-. "$PSScriptRoot\core\state.ps1"
-. "$PSScriptRoot\core\ui.ps1"
-. "$PSScriptRoot\core\validator.ps1"
-. "$PSScriptRoot\core\packages.ps1"
-. "$PSScriptRoot\core\backup.ps1"
-. "$PSScriptRoot\core\error-handler.ps1"
+    . "$PSScriptRoot\installers\languages.ps1"
+    . "$PSScriptRoot\installers\devtools.ps1"
+    . "$PSScriptRoot\installers\webtools.ps1"
+    . "$PSScriptRoot\installers\dbtools.ps1"
+    . "$PSScriptRoot\installers\observability.ps1"
+    . "$PSScriptRoot\installers\personal.ps1"
+    . "$PSScriptRoot\installers\wsl.ps1"
+    . "$PSScriptRoot\installers\npm-packages.ps1"
 
-. "$PSScriptRoot\installers\languages.ps1"
-. "$PSScriptRoot\installers\devtools.ps1"
-. "$PSScriptRoot\installers\webtools.ps1"
-. "$PSScriptRoot\installers\dbtools.ps1"
-. "$PSScriptRoot\installers\observability.ps1"
-. "$PSScriptRoot\installers\personal.ps1"
-. "$PSScriptRoot\installers\wsl.ps1"
-. "$PSScriptRoot\installers\npm-packages.ps1"
-
-. "$PSScriptRoot\utils\cache.ps1"
-. "$PSScriptRoot\utils\parallel.ps1"
+    . "$PSScriptRoot\utils\cache.ps1"
+    . "$PSScriptRoot\utils\parallel.ps1"
+}
+catch {
+    Write-Host "Erro ao carregar módulos: $_" -ForegroundColor Red
+    Write-Host "Verifique se todos os arquivos existem no diretório." -ForegroundColor Yellow
+    exit 1
+}
 
 Initialize-Log
 Initialize-State
@@ -60,7 +76,9 @@ Initialize-State
 trap {
     Write-Host ""
     Write-Host ""
-    Write-Log "Instalação interrompida pelo usuário" "WARNING"
+    if (Get-Command Write-Log -ErrorAction SilentlyContinue) {
+        Write-Log "Instalação interrompida pelo usuário" "WARNING"
+    }
     Write-Host "Instalação interrompida. Estado parcial foi salvo." -ForegroundColor Yellow
     Write-Host "Execute novamente para continuar de onde parou." -ForegroundColor Yellow
     exit 130
@@ -302,8 +320,8 @@ function Retry-FailedPackages {
     
     Write-Host ""
     Write-Host "Resultado do retry:" -ForegroundColor Cyan
-    Write-Host "  ✓ Sucesso: $($retryResults.Success.Count)" -ForegroundColor Green
-    Write-Host "  ✗ Falhou: $($retryResults.Failed.Count)" -ForegroundColor Red
+    Write-Host "  [OK] Sucesso: $($retryResults.Success.Count)" -ForegroundColor Green
+    Write-Host "  [X] Falhou: $($retryResults.Failed.Count)" -ForegroundColor Red
     Write-Host ""
     
     return $retryResults
@@ -463,8 +481,8 @@ function Start-Installation {
 
                 Write-Host ""
                 Write-Host "Resultado final após retry:" -ForegroundColor Cyan
-                Write-Host "  ✓ Total instalados: $($globalResults.Success.Count)" -ForegroundColor Green
-                Write-Host "  ✗ Total falhados: $($globalResults.Failed.Count)" -ForegroundColor Red
+                Write-Host "  [OK] Total instalados: $($globalResults.Success.Count)" -ForegroundColor Green
+                Write-Host "  [X] Total falhados: $($globalResults.Failed.Count)" -ForegroundColor Red
                 Write-Host ""
             }
         }

@@ -1,4 +1,4 @@
-function Install-Git {
+﻿function Install-Git {
     [CmdletBinding()]
     param()
 
@@ -23,7 +23,7 @@ function Install-Git {
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
         if (Get-Command git -ErrorAction SilentlyContinue) {
-            Write-Host "✓ Git instalado com sucesso" -ForegroundColor Green
+            Write-Host "[OK] Git instalado com sucesso" -ForegroundColor Green
             return $true
         }
 
@@ -51,7 +51,7 @@ function Configure-GitUser {
         git config --global user.name $Name
         git config --global user.email $Email
 
-        Write-Host "✓ Usuário Git configurado" -ForegroundColor Green
+        Write-Host "[OK] Usuário Git configurado" -ForegroundColor Green
         Write-Host "  Nome: $Name" -ForegroundColor Gray
         Write-Host "  Email: $Email" -ForegroundColor Gray
 
@@ -82,7 +82,7 @@ function Set-GitAliases {
             git config --global alias.$alias $aliases[$alias]
         }
 
-        Write-Host "✓ Aliases Git configurados" -ForegroundColor Green
+        Write-Host "[OK] Aliases Git configurados" -ForegroundColor Green
         return $true
     }
     catch {
@@ -102,7 +102,7 @@ function Configure-GitCredentials {
     try {
         git config --global credential.helper $Helper
 
-        Write-Host "✓ Git credential helper configurado: $Helper" -ForegroundColor Green
+        Write-Host "[OK] Git credential helper configurado: $Helper" -ForegroundColor Green
         return $true
     }
     catch {
@@ -126,7 +126,7 @@ function Import-GitAliases {
 
         git config --global --add include.path $ConfigPath
 
-        Write-Host "✓ Aliases importados de: $ConfigPath" -ForegroundColor Green
+        Write-Host "[OK] Aliases importados de: $ConfigPath" -ForegroundColor Green
         return $true
     }
     catch {
@@ -145,7 +145,7 @@ function Initialize-GitConfig {
         git config --global pull.rebase false
         git config --global core.editor "code --wait"
 
-        Write-Host "✓ Configurações Git padrão aplicadas" -ForegroundColor Green
+        Write-Host "[OK] Configurações Git padrão aplicadas" -ForegroundColor Green
         return $true
     }
     catch {

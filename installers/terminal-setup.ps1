@@ -1,4 +1,4 @@
-function Install-OhMyPosh {
+﻿function Install-OhMyPosh {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$false)]
@@ -28,7 +28,7 @@ function Install-OhMyPosh {
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
         if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
-            Write-Host "✓ Oh My Posh instalado com sucesso" -ForegroundColor Green
+            Write-Host "[OK] Oh My Posh instalado com sucesso" -ForegroundColor Green
             return $true
         }
         else {
@@ -55,7 +55,7 @@ function Install-NerdFont {
         oh-my-posh font install $FontName 2>&1 | Out-Null
 
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "✓ Nerd Font $FontName instalada" -ForegroundColor Green
+            Write-Host "[OK] Nerd Font $FontName instalada" -ForegroundColor Green
             Write-Host "Configure sua fonte no terminal para: $FontName Nerd Font" -ForegroundColor Yellow
             return $true
         }
@@ -109,7 +109,7 @@ function Set-OhMyPoshTheme {
 
         Invoke-Expression $initCommand
 
-        Write-Host "✓ Tema Oh My Posh configurado: $ThemeName" -ForegroundColor Green
+        Write-Host "[OK] Tema Oh My Posh configurado: $ThemeName" -ForegroundColor Green
 
         if ($AddToProfile) {
             $profilePath = $PROFILE
@@ -122,7 +122,7 @@ function Set-OhMyPoshTheme {
 
             if ($profileContent -notlike "*oh-my-posh init*") {
                 Add-Content -Path $profilePath -Value "`n$initCommand"
-                Write-Host "✓ Oh My Posh adicionado ao perfil do PowerShell" -ForegroundColor Green
+                Write-Host "[OK] Oh My Posh adicionado ao perfil do PowerShell" -ForegroundColor Green
             }
             else {
                 Write-Host "Oh My Posh já está no perfil" -ForegroundColor Yellow
@@ -210,7 +210,7 @@ function New-CustomOhMyPoshTheme {
 
         Copy-Item -Path $baseThemePath -Destination $customThemePath -Force
 
-        Write-Host "✓ Tema customizado criado: $customThemePath" -ForegroundColor Green
+        Write-Host "[OK] Tema customizado criado: $customThemePath" -ForegroundColor Green
         Write-Host "Edite o arquivo para personalizar seu tema" -ForegroundColor Yellow
 
         return $customThemePath
@@ -255,7 +255,7 @@ function Install-Starship {
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
         if (Get-Command starship -ErrorAction SilentlyContinue) {
-            Write-Host "✓ Starship instalado com sucesso" -ForegroundColor Green
+            Write-Host "[OK] Starship instalado com sucesso" -ForegroundColor Green
             return $true
         }
         else {
@@ -309,7 +309,7 @@ function Set-StarshipConfig {
 
         Invoke-Expression $initCommand
 
-        Write-Host "✓ Starship configurado" -ForegroundColor Green
+        Write-Host "[OK] Starship configurado" -ForegroundColor Green
 
         if ($AddToProfile) {
             $profilePath = $PROFILE
@@ -322,7 +322,7 @@ function Set-StarshipConfig {
 
             if ($profileContent -notlike "*starship init*") {
                 Add-Content -Path $profilePath -Value "`n$initCommand"
-                Write-Host "✓ Starship adicionado ao perfil do PowerShell" -ForegroundColor Green
+                Write-Host "[OK] Starship adicionado ao perfil do PowerShell" -ForegroundColor Green
             }
             else {
                 Write-Host "Starship já está no perfil" -ForegroundColor Yellow

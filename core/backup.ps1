@@ -1,4 +1,4 @@
-function Get-BackupDirectory {
+﻿function Get-BackupDirectory {
     [CmdletBinding()]
     param()
 
@@ -73,7 +73,7 @@ function Backup-Configuration {
         $metadataFile = Join-Path $BackupPath "backup-metadata.json"
         $metadata | ConvertTo-Json | Set-Content $metadataFile -Force
 
-        Write-Host "✓ Backup criado: $BackupPath" -ForegroundColor Green
+        Write-Host "[OK] Backup criado: $BackupPath" -ForegroundColor Green
 
         return $BackupPath
     }
@@ -147,7 +147,7 @@ function Backup-ConfigurationAuto {
         $metadataFile = Join-Path $backupPath "backup-metadata.json"
         $metadata | ConvertTo-Json | Set-Content $metadataFile -Force
 
-        Write-Host "✓ Backup automático criado: $backupPath" -ForegroundColor Green
+        Write-Host "[OK] Backup automático criado: $backupPath" -ForegroundColor Green
         Write-Host "  Itens incluídos: $($backedUpItems.Count)" -ForegroundColor Cyan
 
         return $backupPath
@@ -263,7 +263,7 @@ function Restore-Configuration {
                 Copy-Item -Path (Join-Path $backupPath (Split-Path $metadata.SourcePath -Leaf)) -Destination $metadata.SourcePath -Force
             }
 
-            Write-Host "✓ Backup restaurado para: $($metadata.SourcePath)" -ForegroundColor Green
+            Write-Host "[OK] Backup restaurado para: $($metadata.SourcePath)" -ForegroundColor Green
         }
         else {
             Write-Host "Itens no backup:" -ForegroundColor Yellow
@@ -312,10 +312,10 @@ function Remove-OldBackups {
 
         foreach ($backup in $backups) {
             Remove-Item -Path $backup.FullName -Recurse -Force
-            Write-Host "  ✓ Removido: $($backup.Name)" -ForegroundColor Gray
+            Write-Host "  [OK] Removido: $($backup.Name)" -ForegroundColor Gray
         }
 
-        Write-Host "✓ $($backups.Count) backups removidos" -ForegroundColor Green
+        Write-Host "[OK] $($backups.Count) backups removidos" -ForegroundColor Green
 
         return $true
     }
@@ -484,7 +484,7 @@ function Export-BackupArchive {
 
         Compress-Archive -Path "$backupPath\*" -DestinationPath $OutputPath -Force
 
-        Write-Host "✓ Backup exportado para: $OutputPath" -ForegroundColor Green
+        Write-Host "[OK] Backup exportado para: $OutputPath" -ForegroundColor Green
 
         $fileSize = [math]::Round((Get-Item $OutputPath).Length / 1MB, 2)
         Write-Host "  Tamanho: $fileSize MB" -ForegroundColor Cyan
@@ -518,7 +518,7 @@ function Import-BackupArchive {
 
         Expand-Archive -Path $ArchivePath -DestinationPath $importPath -Force
 
-        Write-Host "✓ Backup importado para: $importPath" -ForegroundColor Green
+        Write-Host "[OK] Backup importado para: $importPath" -ForegroundColor Green
 
         return $importPath
     }

@@ -1,4 +1,4 @@
-function Install-Languages {
+﻿function Install-Languages {
     param(
         [array]$PackagesToInstall
     )
@@ -46,7 +46,7 @@ function Install-Languages {
                     Write-Status "$($pkg.name) instalado com sucesso" "SUCCESS"
                     Add-InstalledPackage -PackageName $pkg.choco_package
                     $results.Success += $pkg.name
-                    Write-Log "✓ $($pkg.name) instalado" "SUCCESS"
+                    Write-Log "[OK] $($pkg.name) instalado" "SUCCESS"
                 }
             }
             catch {
@@ -63,7 +63,7 @@ function Install-Languages {
         if (-not $success) {
             Write-Status "$($pkg.name) falhou após $maxAttempts tentativas" "ERROR"
             $results.Failed += $pkg.name
-            Write-Log "✗ $($pkg.name) falhou" "ERROR"
+            Write-Log "[X] $($pkg.name) falhou" "ERROR"
         }
     }
     

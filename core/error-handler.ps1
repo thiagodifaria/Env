@@ -1,4 +1,4 @@
-function Write-ErrorLog {
+﻿function Write-ErrorLog {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
@@ -83,34 +83,60 @@ function Test-Prerequisites {
     param()
 
     try {
+        $psVersion = $PSVersionTable.PSVersion
+        $isAdmin = Test-Administrator
+        $hasDiskSpace = Test-DiskSpace -RequiredGB 10
+        $hasNetwork = Test-NetworkConnection
+
+        $prereqInfo = [PSCustomObject]@{
+            PowerShellVersion = $psVersion
+            IsAdministrator = $isAdmin
+            HasDiskSpace = $hasDiskSpace
+            HasNetwork = $hasNetwork
+            AllMet = ($isAdmin -and $hasDiskSpace -and $hasNetwork -and $psVersion -ge [Version]"5.1")
+        }
+
         $issues = @()
 
-        if (-not (Test-Administrator)) {
+        if (-not $isAdmin) {
             $issues += "Privilégios de administrador necessários"
         }
 
-        if (-not (Test-DiskSpace -RequiredGB 10)) {
+        if (-not $hasDiskSpace) {
             $issues += "Espaço em disco insuficiente (mínimo 10GB)"
         }
 
-        if (-not (Test-NetworkConnection)) {
+        if (-not $hasNetwork) {
             $issues += "Sem conexão com a internet"
         }
 
+        if ($psVersion -lt [Version]"5.1") {
+            $issues += "PowerShell 5.1 ou superior necessário (atual: $psVersion)"
+        }
+
+        # Exibe resultado
         if ($issues.Count -gt 0) {
             Write-Host "`nProblemas detectados:" -ForegroundColor Red
             foreach ($issue in $issues) {
-                Write-Host "  ✗ $issue" -ForegroundColor Yellow
+                Write-Host "  [X] $issue" -ForegroundColor Yellow
             }
-            return $false
+        }
+        else {
+            Write-Host "[OK] Todos os pré-requisitos atendidos" -ForegroundColor Green
         }
 
-        Write-Host "✓ Todos os pré-requisitos atendidos" -ForegroundColor Green
-        return $true
+        return $prereqInfo
     }
     catch {
         Write-ErrorLog -Message "Erro ao verificar pré-requisitos" -ErrorRecord $_ -Severity 'Error'
-        return $false
+        
+        return [PSCustomObject]@{
+            PowerShellVersion = $PSVersionTable.PSVersion
+            IsAdministrator = $false
+            HasDiskSpace = $false
+            HasNetwork = $false
+            AllMet = $false
+        }
     }
 }
 
@@ -185,7 +211,7 @@ function Clear-ErrorLogs {
             Write-Verbose "Removido: $($log.Name)"
         }
 
-        Write-Host "✓ $($oldLogs.Count) logs antigos removidos" -ForegroundColor Green
+        Write-Host "[OK] $($oldLogs.Count) logs antigos removidos" -ForegroundColor Green
 
         return $true
     }

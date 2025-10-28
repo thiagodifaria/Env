@@ -1,4 +1,4 @@
-function New-SelfSignedCodeCertificate {
+﻿function New-SelfSignedCodeCertificate {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$false)]
@@ -101,11 +101,11 @@ function Sign-ProjectScripts {
             try {
                 Set-AuthenticodeSignature -FilePath $script.FullName -Certificate $cert -ErrorAction Stop | Out-Null
                 $signed++
-                Write-Host "  ✓ $($script.Name)" -ForegroundColor Green
+                Write-Host "  [OK] $($script.Name)" -ForegroundColor Green
             }
             catch {
                 $failed++
-                Write-Warning "  ✗ $($script.Name): $_"
+                Write-Warning "  [X] $($script.Name): $_"
             }
         }
 

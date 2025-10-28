@@ -1,4 +1,4 @@
-function Get-CacheDirectory {
+﻿function Get-CacheDirectory {
     [CmdletBinding()]
     param()
 

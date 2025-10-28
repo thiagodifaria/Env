@@ -1,4 +1,4 @@
-function Install-WebTools {
+﻿function Install-WebTools {
     param(
         [array]$PackagesToInstall
     )
@@ -41,7 +41,7 @@ function Install-WebTools {
                     Write-Status "$($pkg.name) instalado com sucesso" "SUCCESS"
                     Add-InstalledPackage -PackageName $pkg.choco_package
                     $results.Success += $pkg.name
-                    Write-Log "✓ $($pkg.name) instalado" "SUCCESS"
+                    Write-Log "[OK] $($pkg.name) instalado" "SUCCESS"
                 }
             }
             catch {
@@ -55,7 +55,7 @@ function Install-WebTools {
         if (-not $success) {
             Write-Status "$($pkg.name) falhou após 3 tentativas" "ERROR"
             $results.Failed += $pkg.name
-            Write-Log "✗ $($pkg.name) falhou" "ERROR"
+            Write-Log "[X] $($pkg.name) falhou" "ERROR"
         }
     }
     

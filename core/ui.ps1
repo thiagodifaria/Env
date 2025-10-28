@@ -1,4 +1,4 @@
-function Show-Banner {
+﻿function Show-Banner {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$false)]
@@ -185,7 +185,7 @@ function Show-PackageMenu {
                 $isSelected = $selected -contains $pkg.id
 
                 if ($isSelected) {
-                    Write-Host "  [✓] " -ForegroundColor Green -NoNewline
+                    Write-Host "  [[OK]] " -ForegroundColor Green -NoNewline
                 }
                 else {
                     Write-Host "  [ ] " -ForegroundColor Gray -NoNewline
@@ -273,7 +273,7 @@ function Show-ProgressBar {
             $filled = [math]::Round(($percentComplete / 100) * $barLength)
             $empty = $barLength - $filled
 
-            $bar = "█" * $filled + "░" * $empty
+            $bar = "#" * $filled + "-" * $empty
 
             Write-Host "`r[$bar] $percentComplete% - $Activity" -NoNewline -ForegroundColor Green
         }
@@ -305,7 +305,7 @@ function Show-CategoryProgress {
         $filled = [math]::Round(($percent / 100) * $barLength)
         $empty = $barLength - $filled
 
-        $bar = "█" * $filled + "░" * $empty
+        $bar = "#" * $filled + "-" * $empty
 
         Write-Host "  $Category`: [$bar] $percent% ($Current/$Total)" -ForegroundColor Cyan
     }
@@ -333,7 +333,7 @@ function Show-GlobalProgress {
         $filled = [math]::Round(($percent / 100) * $barLength)
         $empty = $barLength - $filled
 
-        $bar = "█" * $filled + "░" * $empty
+        $bar = "#" * $filled + "-" * $empty
 
         Write-Host ""
         Write-Host "Progresso Global: [$bar] $percent% ($CurrentCategory/$TotalCategories categorias)" -ForegroundColor Magenta
@@ -382,7 +382,7 @@ function Show-DownloadProgress {
         $webClient.Dispose()
 
         Write-Progress -Activity "Download em progresso" -Completed
-        Write-Host "✓ Download concluído: $fileName" -ForegroundColor Green
+        Write-Host "[OK] Download concluído: $fileName" -ForegroundColor Green
 
         return $true
     }
@@ -523,7 +523,7 @@ function Show-SpinnerWhile {
         $result = Receive-Job -Job $job
         Remove-Job -Job $job
 
-        Write-Host "`r✓ $Message - Concluído" -ForegroundColor Green
+        Write-Host "`r[OK] $Message - Concluído" -ForegroundColor Green
 
         return $result
     }
@@ -545,12 +545,12 @@ function Write-Status {
     )
 
     $symbol = switch ($Type) {
-        "SUCCESS" { "✓"; $color = "Green" }
-        "ERROR" { "✗"; $color = "Red" }
-        "SKIP" { "⟲"; $color = "Cyan" }
+        "SUCCESS" { "[OK]"; $color = "Green" }
+        "ERROR" { "[X]"; $color = "Red" }
+        "SKIP" { "[~]"; $color = "Cyan" }
         "WORKING" { "➜"; $color = "Yellow" }
-        "WARNING" { "⚠"; $color = "Yellow" }
-        default { "•"; $color = "White" }
+        "WARNING" { "[!]"; $color = "Yellow" }
+        default { "[*]"; $color = "White" }
     }
 
     Write-Host "  $symbol $Message" -ForegroundColor $color
@@ -568,12 +568,12 @@ function Show-Box {
 
     try {
         $length = $Message.Length + 4
-        $border = "═" * $length
+        $border = "=" * $length
 
         Write-Host ""
-        Write-Host "╔$border╗" -ForegroundColor $Color
-        Write-Host "║  $Message  ║" -ForegroundColor $Color
-        Write-Host "╚$border╝" -ForegroundColor $Color
+        Write-Host "+$border+" -ForegroundColor $Color
+        Write-Host "|  $Message  |" -ForegroundColor $Color
+        Write-Host "+$border+" -ForegroundColor $Color
         Write-Host ""
     }
     catch {
@@ -665,14 +665,14 @@ function Set-CustomPrompt {
 
             if ($profileContent -notlike "*Set-CustomPrompt*") {
                 Add-Content -Path $profilePath -Value "`n$functionCall"
-                Write-Host "✓ Prompt adicionado ao perfil" -ForegroundColor Green
+                Write-Host "[OK] Prompt adicionado ao perfil" -ForegroundColor Green
             }
             else {
                 Write-Host "Prompt já configurado no perfil" -ForegroundColor Yellow
             }
         }
 
-        Write-Host "✓ Prompt configurado: $Template" -ForegroundColor Green
+        Write-Host "[OK] Prompt configurado: $Template" -ForegroundColor Green
         return $true
     }
     catch {
@@ -736,10 +736,10 @@ function Set-DeveloperPrompt {
 
                     $status = git status --porcelain 2>$null
                     if ($status) {
-                        Write-Host " ✗" -NoNewline -ForegroundColor Red
+                        Write-Host " [X]" -NoNewline -ForegroundColor Red
                     }
                     else {
-                        Write-Host " ✓" -NoNewline -ForegroundColor Green
+                        Write-Host " [OK]" -NoNewline -ForegroundColor Green
                     }
                 }
             }
@@ -787,10 +787,10 @@ function Set-GitFocusedPrompt {
                     $behind = git rev-list --count 'HEAD..@{u}' 2>$null
 
                     if ($ahead -gt 0) {
-                        Write-Host " ↑$ahead" -NoNewline -ForegroundColor Cyan
+                        Write-Host " ^$ahead" -NoNewline -ForegroundColor Cyan
                     }
                     if ($behind -gt 0) {
-                        Write-Host " ↓$behind" -NoNewline -ForegroundColor Yellow
+                        Write-Host " v$behind" -NoNewline -ForegroundColor Yellow
                     }
 
                     $modified = (git diff --name-only 2>$null | Measure-Object).Count
@@ -811,7 +811,7 @@ function Set-GitFocusedPrompt {
             catch {}
         }
 
-        Write-Host "`n❯" -NoNewline -ForegroundColor Green
+        Write-Host "`n>" -NoNewline -ForegroundColor Green
 
         return " "
     }
@@ -841,10 +841,10 @@ function Set-PowerlinePrompt {
 
                     $status = git status --porcelain 2>$null
                     if ($status) {
-                        Write-Host "✗ " -BackgroundColor DarkMagenta -ForegroundColor Red -NoNewline
+                        Write-Host "[X] " -BackgroundColor DarkMagenta -ForegroundColor Red -NoNewline
                     }
                     else {
-                        Write-Host "✓ " -BackgroundColor DarkMagenta -ForegroundColor Green -NoNewline
+                        Write-Host "[OK] " -BackgroundColor DarkMagenta -ForegroundColor Green -NoNewline
                     }
 
                     Write-Host "" -ForegroundColor DarkMagenta -NoNewline
@@ -878,7 +878,7 @@ function Reset-Prompt {
             "PS $($executionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) "
         }
 
-        Write-Host "✓ Prompt resetado para padrão do PowerShell" -ForegroundColor Green
+        Write-Host "[OK] Prompt resetado para padrão do PowerShell" -ForegroundColor Green
         return $true
     }
     catch {
@@ -940,9 +940,9 @@ function Show-FinalReport {
         $totalCount = $successCount + $failedCount + $skippedCount
 
         Write-Host "Resumo:" -ForegroundColor White
-        Write-Host "  ✓ Instalados com sucesso: $successCount" -ForegroundColor Green
-        Write-Host "  ⟲ Já existiam (pulados): $skippedCount" -ForegroundColor Cyan
-        Write-Host "  ✗ Falharam: $failedCount" -ForegroundColor Red
+        Write-Host "  [OK] Instalados com sucesso: $successCount" -ForegroundColor Green
+        Write-Host "  [~] Já existiam (pulados): $skippedCount" -ForegroundColor Cyan
+        Write-Host "  [X] Falharam: $failedCount" -ForegroundColor Red
         Write-Host "  ─────────────────────────────" -ForegroundColor Gray
         Write-Host "  Total de pacotes: $totalCount" -ForegroundColor White
         Write-Host ""
@@ -957,7 +957,7 @@ function Show-FinalReport {
         if ($failedCount -gt 0) {
             Write-Host "Pacotes que falharam:" -ForegroundColor Yellow
             foreach ($pkg in $Results.Failed) {
-                Write-Host "  ✗ $pkg" -ForegroundColor Red
+                Write-Host "  [X] $pkg" -ForegroundColor Red
             }
             Write-Host ""
         }
@@ -967,39 +967,3 @@ function Show-FinalReport {
         Write-Warning "Erro ao exibir relatório final: $_"
     }
 }
-
-
-Export-ModuleMember -Function @(
-    'Show-Banner',
-    'Show-MainMenu',
-    'Show-CategoryMenu',
-    'Show-OptionsMenu',
-    'Show-PackageMenu',
-
-    'Show-ProgressBar',
-    'Show-CategoryProgress',
-    'Show-GlobalProgress',
-    'Show-DownloadProgress',
-    'Show-InstallationProgress',
-    'Show-MultiProgress',
-    'Complete-Progress',
-
-    'Show-Spinner',
-    'Show-SpinnerWhile',
-
-    'Write-Status',
-    'Show-Box',
-    'Clear-LastLine',
-
-    'Get-PromptTemplates',
-    'Set-CustomPrompt',
-    'Set-MinimalPrompt',
-    'Set-DeveloperPrompt',
-    'Set-GitFocusedPrompt',
-    'Set-PowerlinePrompt',
-    'Reset-Prompt',
-
-    'Show-ConfirmationDialog',
-
-    'Show-FinalReport'
-)

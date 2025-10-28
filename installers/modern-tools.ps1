@@ -1,4 +1,4 @@
-function Install-Bat {
+﻿function Install-Bat {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$false)]
@@ -26,7 +26,7 @@ function Install-Bat {
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
         if (Get-Command bat -ErrorAction SilentlyContinue) {
-            Write-Host "✓ bat instalado com sucesso" -ForegroundColor Green
+            Write-Host "[OK] bat instalado com sucesso" -ForegroundColor Green
             return $true
         }
         else {
@@ -67,7 +67,7 @@ function Install-Eza {
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
         if (Get-Command eza -ErrorAction SilentlyContinue) {
-            Write-Host "✓ eza instalado com sucesso" -ForegroundColor Green
+            Write-Host "[OK] eza instalado com sucesso" -ForegroundColor Green
             return $true
         }
         else {
@@ -109,7 +109,7 @@ function Install-Fzf {
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
         if (Get-Command fzf -ErrorAction SilentlyContinue) {
-            Write-Host "✓ fzf instalado com sucesso" -ForegroundColor Green
+            Write-Host "[OK] fzf instalado com sucesso" -ForegroundColor Green
             return $true
         }
         else {
@@ -150,7 +150,7 @@ function Install-Ripgrep {
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
         if (Get-Command rg -ErrorAction SilentlyContinue) {
-            Write-Host "✓ ripgrep instalado com sucesso" -ForegroundColor Green
+            Write-Host "[OK] ripgrep instalado com sucesso" -ForegroundColor Green
             return $true
         }
         else {
@@ -191,7 +191,7 @@ function Install-Zoxide {
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
         if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-            Write-Host "✓ zoxide instalado com sucesso" -ForegroundColor Green
+            Write-Host "[OK] zoxide instalado com sucesso" -ForegroundColor Green
             return $true
         }
         else {
@@ -244,14 +244,14 @@ function Install-AllModernTools {
         if ($results.Success.Count -gt 0) {
             Write-Host "`nFerramentas instaladas:" -ForegroundColor Green
             foreach ($tool in $results.Success) {
-                Write-Host "  ✓ $tool" -ForegroundColor Gray
+                Write-Host "  [OK] $tool" -ForegroundColor Gray
             }
         }
 
         if ($results.Failed.Count -gt 0) {
             Write-Host "`nFalhas:" -ForegroundColor Red
             foreach ($tool in $results.Failed) {
-                Write-Host "  ✗ $tool" -ForegroundColor Gray
+                Write-Host "  [X] $tool" -ForegroundColor Gray
             }
         }
 

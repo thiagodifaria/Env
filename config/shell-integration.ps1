@@ -1,4 +1,4 @@
-function Initialize-ShellIntegration {
+﻿function Initialize-ShellIntegration {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$false)]
@@ -37,7 +37,7 @@ function Initialize-ShellIntegration {
         }
 
         if ($integrations.Count -gt 0) {
-            Write-Host "✓ Integrações configuradas:" -ForegroundColor Green
+            Write-Host "[OK] Integrações configuradas:" -ForegroundColor Green
             foreach ($integration in $integrations) {
                 Write-Host "  - $integration" -ForegroundColor Gray
             }
@@ -107,7 +107,7 @@ function Add-ToProfile {
 
         if ($profileContent -notlike "*Initialize-ShellIntegration*") {
             Add-Content -Path $profilePath -Value "`n$integrationScript"
-            Write-Host "✓ Integração adicionada ao perfil PowerShell" -ForegroundColor Green
+            Write-Host "[OK] Integração adicionada ao perfil PowerShell" -ForegroundColor Green
         }
         else {
             Write-Host "Integração já está no perfil" -ForegroundColor Yellow
@@ -140,11 +140,11 @@ function Get-ModernToolsStatus {
             $installed = Get-Command $tool.Command -ErrorAction SilentlyContinue
 
             if ($installed) {
-                Write-Host "  ✓ $($tool.Name)" -ForegroundColor Green -NoNewline
+                Write-Host "  [OK] $($tool.Name)" -ForegroundColor Green -NoNewline
                 Write-Host " - $($tool.Alias)" -ForegroundColor Gray
             }
             else {
-                Write-Host "  ✗ $($tool.Name)" -ForegroundColor Red -NoNewline
+                Write-Host "  [X] $($tool.Name)" -ForegroundColor Red -NoNewline
                 Write-Host " - não instalado" -ForegroundColor Gray
             }
         }
@@ -183,7 +183,7 @@ function New-BatConfig {
 
         $config | Set-Content $configFile -Force
 
-        Write-Host "✓ Configuração bat criada em: $configFile" -ForegroundColor Green
+        Write-Host "[OK] Configuração bat criada em: $configFile" -ForegroundColor Green
 
         return $configFile
     }
@@ -214,7 +214,7 @@ function New-EzaAlias {
             eza -a --icons $args
         }
 
-        Write-Host "✓ Aliases eza configurados:" -ForegroundColor Green
+        Write-Host "[OK] Aliases eza configurados:" -ForegroundColor Green
         Write-Host "  ll - lista detalhada com ícones e git" -ForegroundColor Gray
         Write-Host "  lt - visualização em árvore" -ForegroundColor Gray
         Write-Host "  la - mostrar arquivos ocultos" -ForegroundColor Gray
